@@ -53,10 +53,11 @@ router.post('/upload', (req, res) => {
             return res.redirect('/videos?err=Nenhum+arquivo+enviado.');
         }
 
+        const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
         db.prepare(`
             INSERT INTO videos (filename, original_name, size)
             VALUES (?, ?, ?)
-        `).run(req.file.filename, req.file.originalname, req.file.size);
+        `).run(req.file.filename, originalName, req.file.size);
 
         res.redirect('/videos?msg=Vídeo+enviado+com+sucesso.');
     });
@@ -68,7 +69,7 @@ router.post('/:id/delete', (req, res) => {
     if (!video) return res.redirect('/videos?err=Vídeo+não+encontrado.');
 
     const filePath = path.resolve(process.env.VIDEOS_PATH || './uploads', video.filename);
-    try { fs.unlinkSync(filePath); } catch { /* arquivo já removido */ }
+    try { fs.unlinkSync(filePath); } catch (e) { console.warn('Aviso: não foi possível remover arquivo:', filePath, e.message); }
 
     db.prepare('DELETE FROM videos WHERE id = ?').run(video.id);
     res.redirect('/videos?msg=Vídeo+removido.');
