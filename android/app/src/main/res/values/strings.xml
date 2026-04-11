@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PAI TV</string>
+    <string name="notification_channel_name">Sincronização</string>
+    <string name="notification_title">PAI TV</string>
+    <string name="notification_text">Sincronizando vídeos…</string>
+    <string name="waiting_title">Aguardando configuração</string>
+    <string name="waiting_subtitle">Acesse o painel e atribua uma playlist a este dispositivo.</string>
+</resources>

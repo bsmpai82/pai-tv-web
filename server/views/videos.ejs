@@ -1,0 +1,54 @@
+<%- include('partials/header', { title: 'Vídeos' }) %>
+
+<h1>Vídeos</h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="box">
+    <h2>Enviar novo vídeo</h2>
+    <form action="/videos/upload" method="POST" enctype="multipart/form-data">
+        <div class="form-row">
+            <label>Arquivo MP4 (máx. 2 GB, até 1080p, bitrate ≤ 8 Mbps)</label>
+            <input type="file" name="video" accept="video/mp4" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+
+<div class="box">
+    <h2>Vídeos armazenados (<%= videos.length %>)</h2>
+    <% if (videos.length === 0) { %>
+        <p style="color:#888">Nenhum vídeo enviado ainda.</p>
+    <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome original</th>
+                <th>Tamanho</th>
+                <th>Em playlists</th>
+                <th>Enviado em</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        <% videos.forEach(v => { %>
+            <tr>
+                <td><%= v.original_name %></td>
+                <td><%= (v.size / 1024 / 1024).toFixed(1) %> MB</td>
+                <td><%= v.playlist_count %></td>
+                <td><%= new Date(v.created_at).toLocaleString('pt-BR') %></td>
+                <td>
+                    <form action="/videos/<%= v.id %>/delete" method="POST"
+                          onsubmit="return confirm('Remover este vídeo permanentemente?')">
+                        <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                    </form>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

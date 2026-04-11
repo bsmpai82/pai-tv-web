@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>PAI TV — Login</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="login-page">
+    <div class="login-box">
+        <h1>PAI TV</h1>
+        <p>Painel de gerenciamento de vídeos</p>
+        <% if (error) { %>
+            <div class="alert alert-error"><%= error %></div>
+        <% } %>
+        <form action="/login" method="POST">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" autofocus required>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>

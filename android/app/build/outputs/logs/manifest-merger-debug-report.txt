@@ -1,0 +1,365 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:2:1-58:12
+INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:2:1-58:12
+INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:2:1-58:12
+INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:2:1-58:12
+MERGED from [androidx.databinding:viewbinding:8.3.2] /home/pai-tv/.gradle/caches/transforms-4/e1c06bbbe81042dd451416b4878605a2/transformed/viewbinding-8.3.2/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/f6e0c066ecb1954f842642dc9ae80bbc/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/18e6a4124899e76225171b953e383673/transformed/appcompat-1.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.media3:media3-ui:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/275256d229ea1628f674bdab42f16bcf/transformed/media3-ui-1.3.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-extractor:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/190c996958957f908d05c100a59f3361/transformed/media3-extractor-1.3.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-container:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/5368f196ea04275225ec918a0d32e083/transformed/media3-container-1.3.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-datasource:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/a117adae34703dffac07f05710f02244/transformed/media3-datasource-1.3.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-decoder:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/d1dff93e03f97faa2638cde0c80d7821/transformed/media3-decoder-1.3.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-database:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/a15bfce62fe5ad8f7ef98105da0b476b/transformed/media3-database-1.3.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media3:media3-common:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/dc34dfa656cbebbaf381e55107fa1125/transformed/media3-common-1.3.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.media3:media3-exoplayer:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/8476e975e605ddef6337b09ca25d09fd/transformed/media3-exoplayer-1.3.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment:1.5.4] /home/pai-tv/.gradle/caches/transforms-4/84a481ac0ccda5a5feee6e84ca4dc367/transformed/fragment-1.5.4/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.activity:activity:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/7bdd4aa3888fb241cc070b18e072da2d/transformed/activity-1.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/8c7fdc20d78bc924500e841172e9646d/transformed/drawerlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/8e46cabc2898ee66bc7d000d4928b247/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.media:media:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/31dcb46c94b27a14e86e577654f89e98/transformed/media-1.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/75e4afb4be5c53b92eed3517ef389eed/transformed/recyclerview-1.3.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/pai-tv/.gradle/caches/transforms-4/72db6578aae02002a24ce53cfbe5c466/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/pai-tv/.gradle/caches/transforms-4/790f63e2962f687b06da99a4a03aefad/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/5c63d947c11749d3ae89078f8971c6ef/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/34adcad40b67704f19329175d40960ec/transformed/customview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/341677c6c1fb3813f95d62eabaa4c10d/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/70f96d1ca25072c1e16e28d7b1ff1bcb/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:17:1-23:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/pai-tv/.gradle/caches/transforms-4/7a3bf8a9ec99e82f40eb755a36f7eeac/transformed/savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/aa9ee2cf3bd16bdb777801e6b26920aa/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/68caa6d5aa3c1ff10da764c5a00b78ee/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/3bc538304d1dc19c122e113f713ebb22/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/18f0268b6e9349f540c66d125926511c/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/49ccd8baa39d519d20cec0fed7dc832a/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/3329dbb88d7b2ab7553c2398ae698d55/transformed/core-ktx-1.13.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /home/pai-tv/.gradle/caches/transforms-4/16bce45f3b1baf7a4da48912cf15e8e0/transformed/annotation-experimental-1.4.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/f8a3430869bdc2673717e5f234d57b41/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/79cdefb5019f4f764d2a45db6a1dbfad/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /home/pai-tv/.gradle/caches/transforms-4/3f8b403a38651dd67d158aad1ae1c3d9/transformed/exifinterface-1.3.6/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/f873cfd402faf8fcc4495965061b3f31/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/55505affb8905807c01db51b5b8fea2a/transformed/startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/89f27221aafbef63751dfbbe4dea81d9/transformed/tracing-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/pai-tv/.gradle/caches/transforms-4/76a672f9756531fd47f240f5f370bac0/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
+	package
+		INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.INTERNET
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:4:5-67
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:4:22-64
+uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:5:5-81
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:5:22-78
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:6:5-77
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:6:22-74
+uses-permission#android.permission.WAKE_LOCK
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:7:5-68
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:7:22-65
+uses-permission#android.permission.SCHEDULE_EXACT_ALARM
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:8:5-79
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:8:22-76
+uses-feature#android.hardware.touchscreen
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:11:5-90
+	android:required
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:11:63-87
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:11:19-62
+uses-feature#android.software.leanback
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:12:5-87
+	android:required
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:12:60-84
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:12:19-59
+application
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:14:5-57:19
+INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:14:5-57:19
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:28:5-89
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/79cdefb5019f4f764d2a45db6a1dbfad/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/79cdefb5019f4f764d2a45db6a1dbfad/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/55505affb8905807c01db51b5b8fea2a/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/55505affb8905807c01db51b5b8fea2a/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+	android:extractNativeLibs
+		INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+	android:label
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:19:9-41
+	android:icon
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:18:9-43
+	android:allowBackup
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:16:9-36
+	android:banner
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:17:9-45
+	android:theme
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:21:9-59
+	android:networkSecurityConfig
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:20:9-69
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:15:9-33
+activity#com.paitv.MainActivity
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:23:9-34:20
+	android:launchMode
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:27:13-44
+	android:exported
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:26:13-36
+	android:configChanges
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:25:13-94
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:24:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER+category:name:android.intent.category.LEANBACK_LAUNCHER
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:28:13-33:29
+action#android.intent.action.MAIN
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:29:17-69
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:29:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:30:17-77
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:30:27-74
+category#android.intent.category.LEANBACK_LAUNCHER
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:32:17-86
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:32:27-83
+service#com.paitv.SyncService
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:36:9-39:56
+	android:exported
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:38:13-37
+	android:foregroundServiceType
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:39:13-53
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:37:13-40
+receiver#com.paitv.BootReceiver
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:41:9-47:20
+	android:exported
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:43:13-36
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:42:13-41
+intent-filter#action:name:android.intent.action.BOOT_COMPLETED
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:44:13-46:29
+action#android.intent.action.BOOT_COMPLETED
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:45:17-79
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:45:25-76
+receiver#com.paitv.SyncAlarmReceiver
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:49:9-55:20
+	android:exported
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:51:13-37
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:50:13-46
+intent-filter#action:name:com.paitv.ACTION_SYNC_ALARM
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:52:13-54:29
+action#com.paitv.ACTION_SYNC_ALARM
+ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:53:17-70
+	android:name
+		ADDED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml:53:25-67
+uses-sdk
+INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+MERGED from [androidx.databinding:viewbinding:8.3.2] /home/pai-tv/.gradle/caches/transforms-4/e1c06bbbe81042dd451416b4878605a2/transformed/viewbinding-8.3.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.databinding:viewbinding:8.3.2] /home/pai-tv/.gradle/caches/transforms-4/e1c06bbbe81042dd451416b4878605a2/transformed/viewbinding-8.3.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/f6e0c066ecb1954f842642dc9ae80bbc/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/f6e0c066ecb1954f842642dc9ae80bbc/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/18e6a4124899e76225171b953e383673/transformed/appcompat-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/18e6a4124899e76225171b953e383673/transformed/appcompat-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.media3:media3-ui:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/275256d229ea1628f674bdab42f16bcf/transformed/media3-ui-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-ui:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/275256d229ea1628f674bdab42f16bcf/transformed/media3-ui-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-extractor:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/190c996958957f908d05c100a59f3361/transformed/media3-extractor-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-extractor:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/190c996958957f908d05c100a59f3361/transformed/media3-extractor-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-container:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/5368f196ea04275225ec918a0d32e083/transformed/media3-container-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-container:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/5368f196ea04275225ec918a0d32e083/transformed/media3-container-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-datasource:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/a117adae34703dffac07f05710f02244/transformed/media3-datasource-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-datasource:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/a117adae34703dffac07f05710f02244/transformed/media3-datasource-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-decoder:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/d1dff93e03f97faa2638cde0c80d7821/transformed/media3-decoder-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-decoder:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/d1dff93e03f97faa2638cde0c80d7821/transformed/media3-decoder-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-database:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/a15bfce62fe5ad8f7ef98105da0b476b/transformed/media3-database-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-database:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/a15bfce62fe5ad8f7ef98105da0b476b/transformed/media3-database-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-common:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/dc34dfa656cbebbaf381e55107fa1125/transformed/media3-common-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-common:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/dc34dfa656cbebbaf381e55107fa1125/transformed/media3-common-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-exoplayer:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/8476e975e605ddef6337b09ca25d09fd/transformed/media3-exoplayer-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-exoplayer:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/8476e975e605ddef6337b09ca25d09fd/transformed/media3-exoplayer-1.3.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.fragment:fragment:1.5.4] /home/pai-tv/.gradle/caches/transforms-4/84a481ac0ccda5a5feee6e84ca4dc367/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.5.4] /home/pai-tv/.gradle/caches/transforms-4/84a481ac0ccda5a5feee6e84ca4dc367/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/7bdd4aa3888fb241cc070b18e072da2d/transformed/activity-1.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/7bdd4aa3888fb241cc070b18e072da2d/transformed/activity-1.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/8c7fdc20d78bc924500e841172e9646d/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/8c7fdc20d78bc924500e841172e9646d/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/8e46cabc2898ee66bc7d000d4928b247/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/8e46cabc2898ee66bc7d000d4928b247/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.media:media:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/31dcb46c94b27a14e86e577654f89e98/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.media:media:1.7.0] /home/pai-tv/.gradle/caches/transforms-4/31dcb46c94b27a14e86e577654f89e98/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/75e4afb4be5c53b92eed3517ef389eed/transformed/recyclerview-1.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/75e4afb4be5c53b92eed3517ef389eed/transformed/recyclerview-1.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/pai-tv/.gradle/caches/transforms-4/72db6578aae02002a24ce53cfbe5c466/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/pai-tv/.gradle/caches/transforms-4/72db6578aae02002a24ce53cfbe5c466/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/pai-tv/.gradle/caches/transforms-4/790f63e2962f687b06da99a4a03aefad/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/pai-tv/.gradle/caches/transforms-4/790f63e2962f687b06da99a4a03aefad/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/5c63d947c11749d3ae89078f8971c6ef/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/5c63d947c11749d3ae89078f8971c6ef/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/34adcad40b67704f19329175d40960ec/transformed/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/34adcad40b67704f19329175d40960ec/transformed/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/341677c6c1fb3813f95d62eabaa4c10d/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/341677c6c1fb3813f95d62eabaa4c10d/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/70f96d1ca25072c1e16e28d7b1ff1bcb/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/70f96d1ca25072c1e16e28d7b1ff1bcb/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/pai-tv/.gradle/caches/transforms-4/7a3bf8a9ec99e82f40eb755a36f7eeac/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/pai-tv/.gradle/caches/transforms-4/7a3bf8a9ec99e82f40eb755a36f7eeac/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/aa9ee2cf3bd16bdb777801e6b26920aa/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/aa9ee2cf3bd16bdb777801e6b26920aa/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/68caa6d5aa3c1ff10da764c5a00b78ee/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/68caa6d5aa3c1ff10da764c5a00b78ee/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/3bc538304d1dc19c122e113f713ebb22/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/3bc538304d1dc19c122e113f713ebb22/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/18f0268b6e9349f540c66d125926511c/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/18f0268b6e9349f540c66d125926511c/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/49ccd8baa39d519d20cec0fed7dc832a/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/49ccd8baa39d519d20cec0fed7dc832a/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/3329dbb88d7b2ab7553c2398ae698d55/transformed/core-ktx-1.13.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/3329dbb88d7b2ab7553c2398ae698d55/transformed/core-ktx-1.13.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /home/pai-tv/.gradle/caches/transforms-4/16bce45f3b1baf7a4da48912cf15e8e0/transformed/annotation-experimental-1.4.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /home/pai-tv/.gradle/caches/transforms-4/16bce45f3b1baf7a4da48912cf15e8e0/transformed/annotation-experimental-1.4.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/f8a3430869bdc2673717e5f234d57b41/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/f8a3430869bdc2673717e5f234d57b41/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/79cdefb5019f4f764d2a45db6a1dbfad/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/79cdefb5019f4f764d2a45db6a1dbfad/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /home/pai-tv/.gradle/caches/transforms-4/3f8b403a38651dd67d158aad1ae1c3d9/transformed/exifinterface-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /home/pai-tv/.gradle/caches/transforms-4/3f8b403a38651dd67d158aad1ae1c3d9/transformed/exifinterface-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/f873cfd402faf8fcc4495965061b3f31/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/f873cfd402faf8fcc4495965061b3f31/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/55505affb8905807c01db51b5b8fea2a/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/55505affb8905807c01db51b5b8fea2a/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/89f27221aafbef63751dfbbe4dea81d9/transformed/tracing-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.tracing:tracing:1.0.0] /home/pai-tv/.gradle/caches/transforms-4/89f27221aafbef63751dfbbe4dea81d9/transformed/tracing-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/pai-tv/.gradle/caches/transforms-4/76a672f9756531fd47f240f5f370bac0/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/pai-tv/.gradle/caches/transforms-4/76a672f9756531fd47f240f5f370bac0/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+	android:targetSdkVersion
+		INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/pai-tv/PAI TV/android/app/src/main/AndroidManifest.xml
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from [androidx.media3:media3-common:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/dc34dfa656cbebbaf381e55107fa1125/transformed/media3-common-1.3.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/8476e975e605ddef6337b09ca25d09fd/transformed/media3-exoplayer-1.3.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/8476e975e605ddef6337b09ca25d09fd/transformed/media3-exoplayer-1.3.1/AndroidManifest.xml:22:5-79
+	android:name
+		ADDED from [androidx.media3:media3-common:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/dc34dfa656cbebbaf381e55107fa1125/transformed/media3-common-1.3.1/AndroidManifest.xml:22:22-76
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/55505affb8905807c01db51b5b8fea2a/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/pai-tv/.gradle/caches/transforms-4/55505affb8905807c01db51b5b8fea2a/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+meta-data#androidx.emoji2.text.EmojiCompatInitializer
+ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/pai-tv/.gradle/caches/transforms-4/14b5c132658a8d5c5f6c87244f57b75c/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+permission#com.paitv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+uses-permission#com.paitv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/pai-tv/.gradle/caches/transforms-4/c4714fff7b58584aa2e88eb5b66c9097/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/pai-tv/.gradle/caches/transforms-4/c5ca5fb8b8abdb18c949720388c95600/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/pai-tv/.gradle/caches/transforms-4/fdbef518c37dd966e84171f509b76554/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92

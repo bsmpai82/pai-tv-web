@@ -1,0 +1,27 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+
+<h1>Dashboard</h1>
+
+<div class="cards">
+    <div class="card">
+        <div class="card-number"><%= videoCount %></div>
+        <div class="card-label">Vídeos</div>
+        <a href="/videos">Gerenciar</a>
+    </div>
+    <div class="card">
+        <div class="card-number"><%= playlistCount %></div>
+        <div class="card-label">Playlists</div>
+        <a href="/playlists">Gerenciar</a>
+    </div>
+    <div class="card">
+        <div class="card-number"><%= deviceCount %></div>
+        <div class="card-label">Dispositivos</div>
+        <% if (pendingCount > 0) { %>
+            <a href="/devices" class="alert-link"><%= pendingCount %> pendente(s)</a>
+        <% } else { %>
+            <a href="/devices">Gerenciar</a>
+        <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
