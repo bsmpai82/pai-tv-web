@@ -97,6 +97,15 @@ class MainActivity : AppCompatActivity() {
             exo.repeatMode = Player.REPEAT_MODE_ALL
             exo.playWhenReady = true
             exo.prepare()
+
+            exo.addListener(object : Player.Listener {
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    val index = exo.currentMediaItemIndex
+                    prefs.currentVideo = if (index < filenames.size) filenames[index] else null
+                }
+            })
+            // Salva o primeiro vídeo imediatamente
+            prefs.currentVideo = filenames.firstOrNull()
         }
     }
 

@@ -22,4 +22,9 @@ class DevicePrefs(context: Context) {
     var cachedFilenames: Set<String>
         get() = prefs.getStringSet("cached_files", emptySet()) ?: emptySet()
         set(value) = prefs.edit().putStringSet("cached_files", value).apply()
+
+    /** Nome do vídeo atualmente em reprodução (para reportar ao servidor). */
+    var currentVideo: String?
+        get() = prefs.getString("current_video", null)
+        set(value) = prefs.edit().putString("current_video", value).apply()
 }

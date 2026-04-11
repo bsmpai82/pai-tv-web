@@ -1,0 +1,183 @@
+PRD  --  App de Distribuição de Vídeos Institucionais via Fire TV Stick
+Versão: 0.2  |  Data: 09/04/2026  |  Autor: Bruno  |  Status: Validado
+
+1. Visão Geral
+Desenvolver uma solução interna composta por (a) um aplicativo Android instalado em dispositivos Amazon Fire TV Stick conectados às TVs da empresa e (b) um servidor central em rede local que permita o gerenciamento, distribuição e reprodução automática de vídeos institucionais, eliminando a necessidade de atualização manual via pen drive em cada TV.
+2. Contexto e Problema
+Hoje, a atualização dos vídeos institucionais exibidos nas TVs da empresa é feita de forma manual: um colaborador precisa se deslocar fisicamente até cada televisão, remover o pen drive, atualizar o conteúdo em um computador e reconectar o dispositivo. Esse processo é:
+ Demorado e propenso a erros.
+ Dependente de presença física, o que atrasa a publicação de novos conteúdos.
+ Difícil de auditar (não há controle de o que está sendo exibido em cada TV).
+ Pouco escalável conforme o número de TVs aumenta.
+3. Objetivos
+3.1 Objetivo principal
+Permitir que novos vídeos institucionais sejam publicados uma única vez em um ponto central e sejam automaticamente distribuídos e exibidos nas TVs corretas, sem intervenção física.
+3.2 Objetivos secundários
+ Reduzir a zero o uso de pen drives na rotina de atualização de conteúdo.
+ Permitir curadoria de qual TV exibe qual playlist.
+ Possibilitar, em fase posterior, o monitoramento remoto do status dos dispositivos.
+3.3 Não-objetivos (fora de escopo neste momento)
+ Reprodução de vídeos via internet / streaming externo.
+ Gerenciamento de dispositivos fora da rede local da empresa.
+ Suporte a outras plataformas (Chromecast, Roku, Smart TVs, Android TV box genéricos)  --  foco exclusivo no Fire TV Stick.
+ Edição ou transcodificação de vídeos dentro da ferramenta.
+ Agendamento por horário específico (ex.: "exibir vídeo X das 9h às 11h")  --  avaliar em fase futura.
+4. Público-alvo e Personas
+4.1 Administrador de conteúdo
+Colaborador responsável por publicar e organizar os vídeos institucionais. Acessa o painel web do servidor local para fazer upload, definir playlists e atribuir playlists às TVs.
+4.2 Colaborador de TI / suporte
+Responsável por instalar o app nos Fire Sticks inicialmente e por manter o servidor local funcionando.
+4.3 Audiência final (passiva)
+Funcionários, visitantes e clientes que assistem aos vídeos nas TVs instaladas pela empresa. Não interagem com o sistema.
+5. Escopo Funcional
+5.1 MVP  --  Fase 1 (prioridade máxima, prazo apertado)
+Servidor central (rede local):
+ Upload de vídeos em formato MP4 (H.264 + AAC) via painel web (máx. 2 GB por arquivo, até 1080p, bitrate recomendado <= 8 Mbps).
+ Organização dos vídeos em "playlists" (listas nomeadas).
+ Cadastro de dispositivos Fire Stick (cada stick recebe um identificador único).
+ Atribuição de uma playlist a cada dispositivo cadastrado.
+ Listagem dos vídeos armazenados, com opção de remover.
+ API local (HTTP) que os Fire Sticks consultam para baixar a playlist e os arquivos.
+App Fire TV Stick:
+ Tela inicial única exibindo os vídeos da playlist atribuída, em loop contínuo.
+ Identificação do dispositivo (ID único persistente) na primeira execução.
+ Consulta periódica ao servidor as 6h para verificar novos vídeos ou alterações de playlist.
+ Botão no painel para forçar a sincronização de novos vídeos com as TVs (Fire sticks) indicadas.
+ Download e cache local dos vídeos (para continuar exibindo mesmo se a rede cair temporariamente).
+ Reprodução automática em loop, sem necessidade de interação.
+ Início automático (autostart) ao ligar o Fire Stick.
+5.2 Fase 2 (pós-MVP)
+ Painel de status: ver quais dispositivos estão online, última sincronização, versão do app, vídeo em reprodução.
+ Logs de reprodução (quantas vezes cada vídeo foi exibido).
+ Pré-visualização (thumbnail) dos vídeos no painel.
+ Agrupamento de dispositivos (ex.: "Recepção", "Refeitório") para atribuir a mesma playlist a um grupo.
+ Notificação de falha (dispositivo sem conexão há mais de Y horas).
+5.3 Fase 3 (futuro, se fizer sentido)
+ Agendamento por horário ou dia da semana.
+ Atualização remota (OTA) do próprio app no Fire Stick.
+ Suporte a imagens estáticas e mix (vídeo + imagem) nas playlists.
+ Controle de usuários com permissões diferenciadas.
+6. Requisitos Não-Funcionais
+Desempenho: Reproducao em 1080p sem travamentos; inicio em ate 10s apos ligar o Fire Stick.Disponibilidade: O app deve reproduzir o ultimo conteudo em cache mesmo sem conexao com o servidor.Rede: Funcionamento restrito a LAN da empresa; sem dependencia de internet.Segurança: Acesso ao painel protegido por senha; API local acessivel apenas na rede interna; sem HTTPS obrigatorio no MVP (rede interna).Usabilidade: Painel web simples e responsivo; instalacao no Fire Stick documentada passo a passo para o TI.Manutenibilidade: Codigo documentado; servidor roda em desktop Linux Ubuntu 24.04 LTS sem dependencias pagas.Custo: Uso exclusivo de tecnologias gratuitas/open source.                                   Categoria
+                                   Requisito
+Desempenho
+Reprodução em 1080p sem travamentos; início em até 10s após ligar o stick.
+Disponibilidade
+App deve reproduzir o último conteúdo em cache mesmo sem conexão com o servidor.
+Rede
+Funcionamento restrito à LAN da empresa; sem dependência de internet.
+Segurança
+Acesso ao painel do servidor protegido por senha; API local restrita à rede interna.
+Usabilidade
+Painel web simples; instalação no Fire Stick deve ser documentada em passo a passo.
+Manutenibilidade
+Código aberto e documentado; possibilidade de rodar o servidor em hardware barato.
+Custo
+Uso exclusivo de tecnologias gratuitas/open source.
+7. Arquitetura Sugerida (alto nível)
++----------------------+        LAN        +---------------------+
+|  Servidor Local      |  <------------->  |  Fire TV Stick 01   |
+|  Ubuntu 24.04 LTS    |                   |  (App Android)      |
+|                      |                   +---------------------+
+|  - Painel web        |  <------------->  |  Fire TV Stick 02   |
+|  - API REST          |                   +---------------------+
+|  - Armazenamento     |  <------------->  |  Fire TV Stick N    |
+|    de vídeos         |                   +---------------------+
++----------------------+
+ Servidor: desktop existente na empresa, rodando Linux Ubuntu 24.04 LTS. Sem custo de hardware ou nuvem.
+ Protocolo: HTTP simples na rede local. Os sticks fazem polling periódico em um endpoint tipo GET /api/device/{id}/playlist.
+ Armazenamento: pasta no disco local do servidor; vídeos servidos como arquivos estáticos. Arquivos devem ser salvos na pasta "/srv/pai_tv/" de onde o sistema deve ler.
+8. Stack Técnica Sugerida (foco em custo zero)
+Servidor
+ Linguagem/framework: Node.js + Express ou Python + FastAPI (escolher conforme familiaridade da equipe).
+ Banco de dados: SQLite (arquivo único, sem servidor adicional).
+ Painel web: HTML + template simples (Jinja/EJS) ou SPA leve. Autenticação: senha única compartilhada no MVP (múltiplos usuários movido para Fase 2).
+ Hospedagem: máquina existente na empresa.
+App Fire TV Stick
+ Plataforma: Android nativo (Fire OS é baseado em Android). Kotlin ou Java.
+ Player: ExoPlayer (biblioteca oficial Google, gratuita, suporta loop e cache).
+ Distribuição: sideload via ADB (não precisa publicar na Amazon Appstore).
+ Persistência local: SharedPreferences para ID do dispositivo; diretório interno para cache de vídeos.
+Alternativa ainda mais rápida de entregar: em vez de app Android nativo, usar um player Android existente (ex.: VLC ou similar) + um script de sincronização. Porém, isso limita muito os recursos e é menos confiável. Recomendação: investir no app próprio mesmo.
+9. Fluxos Principais
+9.1 Publicar um novo vídeo
+ Admin acessa o painel web do servidor pelo navegador.
+ Faz login.
+ Faz upload do arquivo MP4.
+ Adiciona o vídeo a uma ou mais playlists.
+ Na proxima sincronizacao automatica (6h) ou imediatamente apos sync manual acionado pelo admin no painel, todos os Fire Sticks com essa playlist baixam o novo video e passam a exibi-lo.
+9.2 Cadastrar um novo Fire Stick
+ TI instala o APK no Fire Stick via ADB.
+ Na primeira execução, o app gera um ID único e aparece como "dispositivo pendente" no painel.
+ Admin dá um nome ao dispositivo (ex.: "TV Recepção") e atribui uma playlist.
+ O stick começa a reproduzir automaticamente.
+9.3 Sincronização periódica (automática)
+ App consulta o servidor as 6h.
+ Compara a playlist local com a retornada pelo servidor.
+ Baixa arquivos novos, remove os que não estão mais na playlist.
+ Continua reproduzindo em loop sem interrupção perceptível.
+ Opção de sincronização manual disponível no painel.
+10. Métricas de Sucesso
+ Tempo de atualizacao: publicar um video novo e acionar sync manual no painel; video aparece em todas as TVs em menos de 10 minutos. Sync automatico diario ocorre as 6h.
+ Número de idas físicas às TVs: reduzir a praticamente zero após a implantação.
+ Uptime do sistema: >95% dos sticks exibindo conteúdo corretamente em qualquer momento.
+ Tempo gasto pela equipe atualizando TVs: redução mensurável em horas/mês.
+11. Riscos e Mitigações
+Fire Stick nao abrir o app sozinho apos reinicio | Probabilidade: Media | Impacto: Alto | Mitigacao: Configurar autostart via ADB (app como launcher padrao ou app auxiliar de boot).Fire Sticks nao adquiridos antes do Dia 4 | Probabilidade: Alta | Impacto: Alto | Mitigacao: Comprar com urgencia; usar emulador Android TV (AVD) para desenvolvimento nos dias 1-3.Prazo apertado com desenvolvedor solo | Probabilidade: Alta | Impacto: Alto | Mitigacao: Focar ferozmente no MVP da secao 5.1; adiar tudo da Fase 2+.Rede local instavel | Probabilidade: Media | Impacto: Medio | Mitigacao: Cache local garante reproducao offline do ultimo conteudo sincronizado.Perda do servidor local | Probabilidade: Baixa | Impacto: Alto | Mitigacao: Backup periodico da pasta /srv/pai_tv/ e do banco SQLite.Amazon atualizar Fire OS e quebrar o app | Probabilidade: Baixa | Impacto: Medio | Mitigacao: Travar atualizacoes automaticas do stick; Plano B: Android TV Box generico.Videos grandes saturando a LAN durante sync | Probabilidade: Baixa | Impacto: Medio | Mitigacao: Sync agendado para as 6h (horario ocioso); limite de bitrate de 8 Mbps por arquivo.                                     Risco
+                                 Probabilidade
+                                    Impacto
+                                  Mitigação
+Fire Stick reiniciar e não abrir o app sozinho
+Média
+Alto
+Configurar o app como launcher padrão ou usar app auxiliar de autostart.
+Rede local instável
+Média
+Médio
+Cache local garante reprodução offline do último conteúdo.
+Vídeos grandes saturando a LAN
+Baixa
+Médio
+Limitar resolução/bitrate recomendado; agendar sincronização em horários ociosos.
+Prazo apertado vs. escopo
+Alta
+Alto
+Focar ferozmente no MVP da seção 5.1; adiar tudo da seção 5.2+.
+Perda do servidor local
+Baixa
+Alto
+Backup periódico da pasta de vídeos e do banco SQLite.
+Amazon atualizar o Fire OS e quebrar o app
+Baixa
+Médio
+Travar atualizações automáticas do stick; testar antes de atualizar.
+Conhecimento técnico para manter a solução
+Média
+Médio
+Documentação clara de instalação e troubleshooting.
+12. Roadmap Proposto (Sprint de 5 dias)
+ Dia 1: setup do servidor, schema do banco, API esqueleto e autenticação básica (senha única).
+ Dia 2: upload de vídeos (com validação de formato/tamanho), CRUD de playlists, painel web básico.
+ Dia 3: cadastro e registro automático de dispositivos, atribuição de playlist por dispositivo, API de sincronização.
+ Dia 4: app Fire TV Stick - polling, download, cache local, reprodução em loop, autostart.
+ Dia 5: testes integrados, ajustes, documentação de instalação via ADB, piloto com 1-2 Fire Sticks. Pos-MVP: implantação nos 11 dispositivos, início da Fase 2.
+13. Decisões Tomadas
+ - Dispositivos: 11 TVs, 1 Fire Stick por TV.
+ - Servidor: desktop existente na empresa, Linux Ubuntu 24.04 LTS. Sem custo de hardware.
+ - Prazo do MVP: 5 dias uteis a partir de 09/04/2026.
+ - Instalação dos APKs: equipe de TI interna via ADB.
+ - Fire Sticks: ainda nao adquiridos - compra pendente antes do Dia 4 (risco critico).
+ - Limites de video: MP4 H.264+AAC, ate 1080p, max. 8 Mbps de bitrate, max. 2 GB/arquivo, ate 30 min de duracao.
+ - Desenvolvedor: Bruno (solo).
+ - Autenticação no painel: senha única no MVP; múltiplos usuários com perfis na Fase 2.
+ - Confidencialidade dos vídeos: nao confidencial - segurança padrao de LAN é suficiente.
+ - Plano B para sideload bloqueado: substituir Fire Stick por Android TV Box generico (ex.: Xiaomi Mi Box S ou NVIDIA Shield) - o APK Android e compativel sem alteracoes. Publicacao na Amazon Appstore como opcao de longo prazo.
+
+Checklist de Revisão
+ [ ] Problema e objetivos refletem fielmente a sua necessidade?
+ [ ] Escopo do MVP está enxuto o suficiente para o prazo?
+ [ ] Alguma funcionalidade importante ficou de fora?
+ [ ] Stack técnica sugerida faz sentido para quem vai desenvolver?
+ [ ] Riscos cobrem suas preocupações?
+ [x] Todas as questoes em aberto foram respondidas e registradas na secao 13.
+

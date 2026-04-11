@@ -61,8 +61,15 @@ class ApiClient(private val baseUrl: String) {
         }
     }.getOrNull()
 
-    fun heartbeat(deviceUuid: String) = runCatching {
-        val body = "{}".toRequestBody(json)
+    fun heartbeat(deviceUuid: String, appVersion: String? = null, currentVideo: String? = null) = runCatching {
+        val payload = buildString {
+            append("{")
+            appVersion?.let { append("\"app_version\":\"$it\",") }
+            currentVideo?.let { append("\"current_video\":\"$it\",") }
+            if (endsWith(",")) deleteCharAt(length - 1)
+            append("}")
+        }
+        val body = payload.toRequestBody(json)
         val req = Request.Builder().url("$baseUrl/api/device/$deviceUuid/heartbeat").post(body).build()
         client.newCall(req).execute().close()
     }

@@ -16,4 +16,13 @@ db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// Migrações — adiciona colunas novas sem recriar o banco
+const migrations = [
+    `ALTER TABLE devices ADD COLUMN app_version TEXT`,
+    `ALTER TABLE devices ADD COLUMN current_video TEXT`,
+];
+for (const sql of migrations) {
+    try { db.exec(sql); } catch { /* coluna já existe */ }
+}
+
 module.exports = db;

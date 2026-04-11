@@ -11,6 +11,15 @@ router.get('/', (req, res) => {
         LEFT JOIN playlists p ON p.id = d.playlist_id
         ORDER BY d.registered_at DESC
     `).all();
+
+    // Marca online se last_seen nos últimos 10 minutos
+    const now = Date.now();
+    devices.forEach(d => {
+        d.is_online = d.last_seen
+            ? (now - new Date(d.last_seen + 'Z').getTime()) < 10 * 60 * 1000
+            : false;
+    });
+
     const playlists = db.prepare('SELECT * FROM playlists ORDER BY name').all();
     res.render('devices', {
         devices, playlists,
