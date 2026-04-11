@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
     const now = Date.now();
     devices.forEach(d => {
         d.is_online = d.last_seen
-            ? (now - new Date(d.last_seen + 'Z').getTime()) < 10 * 60 * 1000
+            ? (now - new Date(d.last_seen.replace(' ', 'T') + 'Z').getTime()) < 10 * 60 * 1000
             : false;
     });
 
