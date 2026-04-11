@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -)"
+      "Bash(python -)",
+      "Bash(sudo cp:*)",
+      "Bash(sudo systemctl:*)"
     ]
   }
 }

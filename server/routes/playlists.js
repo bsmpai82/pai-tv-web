@@ -76,6 +76,46 @@ router.post('/:id/videos/:videoId/remove', (req, res) => {
     res.redirect(`/playlists/${req.params.id}?msg=Vídeo+removido+da+playlist.`);
 });
 
+// Mover vídeo na ordem (direção: up | down)
+router.post('/:id/videos/:videoId/move', (req, res) => {
+    const playlistId = req.params.id;
+    const videoId    = req.params.videoId;
+    const direction  = req.body.direction;
+
+    const videos = db.prepare(`
+        SELECT video_id, position FROM playlist_videos
+        WHERE playlist_id = ?
+        ORDER BY position ASC, video_id ASC
+    `).all(playlistId);
+
+    const idx = videos.findIndex(v => String(v.video_id) === String(videoId));
+    if (idx === -1) return res.redirect(`/playlists/${playlistId}`);
+
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= videos.length) return res.redirect(`/playlists/${playlistId}`);
+
+    // Troca as posições dos dois vídeos
+    const posA = videos[idx].position;
+    const posB = videos[swapIdx].position;
+
+    db.prepare('UPDATE playlist_videos SET position = ? WHERE playlist_id = ? AND video_id = ?')
+      .run(posB, playlistId, videoId);
+    db.prepare('UPDATE playlist_videos SET position = ? WHERE playlist_id = ? AND video_id = ?')
+      .run(posA, playlistId, videos[swapIdx].video_id);
+
+    res.redirect(`/playlists/${playlistId}`);
+});
+
+// Forçar sync em todos os dispositivos que usam esta playlist (direta ou via grupo)
+router.post('/:id/sync', (req, res) => {
+    db.prepare(`
+        UPDATE devices SET force_sync = 1
+        WHERE playlist_id = ?
+           OR group_id IN (SELECT id FROM groups WHERE playlist_id = ?)
+    `).run(req.params.id, req.params.id);
+    res.redirect(`/playlists/${req.params.id}?msg=Sync+solicitado+para+todos+os+dispositivos+desta+playlist.`);
+});
+
 // Excluir playlist
 router.post('/:id/delete', (req, res) => {
     db.prepare('DELETE FROM playlists WHERE id = ?').run(req.params.id);

@@ -27,6 +27,15 @@
     <% } %>
 </div>
 
+<div style="margin-bottom:16px">
+    <form action="/playlists/<%= playlist.id %>/sync" method="POST" style="display:inline">
+        <button type="submit" class="btn btn-primary"
+                onclick="return confirm('Sincronizar todos os dispositivos desta playlist agora?')">
+            Sincronizar dispositivos
+        </button>
+    </form>
+</div>
+
 <div class="box">
     <h2>Vídeos na playlist (<%= videos.length %>)</h2>
     <% if (videos.length === 0) { %>
@@ -44,13 +53,23 @@
         <tbody>
         <% videos.forEach((v, i) => { %>
             <tr>
-                <td><%= i + 1 %></td>
+                <td style="text-align:center;width:30px"><%= i + 1 %></td>
                 <td><%= v.original_name %></td>
                 <td><%= (v.size / 1024 / 1024).toFixed(1) %> MB</td>
                 <td>
-                    <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/remove" method="POST">
-                        <button type="submit" class="btn btn-danger btn-sm">Remover</button>
-                    </form>
+                    <div style="display:flex;gap:4px">
+                        <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/move" method="POST">
+                            <input type="hidden" name="direction" value="up">
+                            <button type="submit" class="btn btn-primary btn-sm" <%= i === 0 ? 'disabled' : '' %>>▲</button>
+                        </form>
+                        <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/move" method="POST">
+                            <input type="hidden" name="direction" value="down">
+                            <button type="submit" class="btn btn-primary btn-sm" <%= i === videos.length - 1 ? 'disabled' : '' %>>▼</button>
+                        </form>
+                        <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/remove" method="POST">
+                            <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
         <% }) %>
