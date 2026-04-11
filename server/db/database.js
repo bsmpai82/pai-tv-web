@@ -20,6 +20,7 @@ db.exec(schema);
 const migrations = [
     `ALTER TABLE devices ADD COLUMN app_version TEXT`,
     `ALTER TABLE devices ADD COLUMN current_video TEXT`,
+    `ALTER TABLE videos ADD COLUMN thumb TEXT`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

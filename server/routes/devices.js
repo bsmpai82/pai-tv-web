@@ -39,7 +39,7 @@ router.post('/:id/name', (req, res) => {
 // Atribuir playlist
 router.post('/:id/playlist', (req, res) => {
     const playlist_id = req.body.playlist_id || null;
-    db.prepare('UPDATE devices SET playlist_id = ? WHERE id = ?').run(playlist_id, req.params.id);
+    db.prepare('UPDATE devices SET playlist_id = ?, force_sync = 1 WHERE id = ?').run(playlist_id, req.params.id);
     res.redirect('/devices?msg=Playlist+atribuída.');
 });
 

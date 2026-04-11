@@ -28,6 +28,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/media', express.static(path.resolve(VIDEOS_PATH)));
 
+const THUMBS_PATH = process.env.THUMBS_PATH || '/srv/pai_tv/thumbs';
+if (!fs.existsSync(THUMBS_PATH)) fs.mkdirSync(THUMBS_PATH, { recursive: true });
+app.use('/thumbs', express.static(path.resolve(THUMBS_PATH)));
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'pai-tv-secret-change-me',
     resave: false,

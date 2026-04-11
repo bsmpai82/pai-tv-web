@@ -24,6 +24,7 @@
     <table>
         <thead>
             <tr>
+                <th></th>
                 <th>Nome original</th>
                 <th>Tamanho</th>
                 <th>Em playlists</th>
@@ -34,6 +35,13 @@
         <tbody>
         <% videos.forEach(v => { %>
             <tr>
+                <td style="width:60px">
+                    <% if (v.thumb) { %>
+                        <img src="/thumbs/<%= v.thumb %>" style="width:56px;height:32px;object-fit:cover;border-radius:3px">
+                    <% } else { %>
+                        <div style="width:56px;height:32px;background:#333;border-radius:3px"></div>
+                    <% } %>
+                </td>
                 <td><%= v.original_name %></td>
                 <td><%= (v.size / 1024 / 1024).toFixed(1) %> MB</td>
                 <td><%= v.playlist_count %></td>

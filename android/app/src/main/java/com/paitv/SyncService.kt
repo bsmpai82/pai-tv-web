@@ -67,16 +67,23 @@ class SyncService : Service() {
 
         val changed = videoManager.sync(videos, api)
 
-        prefs.lastPlaylistHash = check.playlistHash
+        // Só salva o hash se todos os vídeos foram baixados com sucesso
+        val allCached = videos.all { videoManager.isCached(it.filename) }
+        if (allCached) {
+            prefs.lastPlaylistHash = check.playlistHash
+        } else {
+            Log.w("SyncService", "Nem todos os vídeos foram baixados. Hash não salvo — tentará novamente.")
+        }
 
-        if (changed || check.forceSync) {
-            // Notifica a MainActivity para recarregar o player
-            val filenames = videos.map { it.filename }
+        // Envia apenas os filenames que estão em cache para o player
+        val cachedFilenames = videos.map { it.filename }.filter { videoManager.isCached(it) }
+
+        if ((changed || check.forceSync) && cachedFilenames.isNotEmpty()) {
             sendBroadcast(Intent(ACTION_PLAYLIST_UPDATED).apply {
                 `package` = packageName
-                putStringArrayListExtra("filenames", ArrayList(filenames))
+                putStringArrayListExtra("filenames", ArrayList(cachedFilenames))
             })
-            Log.i("SyncService", "Sync concluído. ${videos.size} vídeo(s).")
+            Log.i("SyncService", "Sync concluído. ${cachedFilenames.size}/${videos.size} vídeo(s) em cache.")
         }
     }
 
