@@ -48,11 +48,38 @@ app.use('/groups', requireAuth, groupRoutes);
 app.use('/api', apiRoutes);
 
 app.get('/', requireAuth, (req, res) => {
-    const videoCount   = db.prepare('SELECT COUNT(*) AS n FROM videos').get().n;
+    const videoCount    = db.prepare('SELECT COUNT(*) AS n FROM videos').get().n;
     const playlistCount = db.prepare('SELECT COUNT(*) AS n FROM playlists').get().n;
-    const deviceCount  = db.prepare('SELECT COUNT(*) AS n FROM devices').get().n;
-    const pendingCount = db.prepare('SELECT COUNT(*) AS n FROM devices WHERE name IS NULL').get().n;
-    res.render('dashboard', { videoCount, playlistCount, deviceCount, pendingCount });
+    const deviceCount   = db.prepare('SELECT COUNT(*) AS n FROM devices').get().n;
+    const groupCount    = db.prepare('SELECT COUNT(*) AS n FROM groups').get().n;
+    const pendingCount  = db.prepare('SELECT COUNT(*) AS n FROM devices WHERE name IS NULL').get().n;
+
+    // Lista de dispositivos com status online/offline
+    const devices = db.prepare(`
+        SELECT d.name, d.last_seen
+        FROM devices d
+        WHERE d.name IS NOT NULL
+        ORDER BY d.name ASC
+    `).all();
+    const now = Date.now();
+    devices.forEach(d => {
+        d.is_online = d.last_seen
+            ? (now - new Date(d.last_seen.replace(' ', 'T') + 'Z').getTime()) < 10 * 60 * 1000
+            : false;
+    });
+
+    // Dispositivos configurados offline há mais de 1 hora
+    const offlineDevices = db.prepare(`
+        SELECT name FROM devices
+        WHERE name IS NOT NULL
+          AND (
+            last_seen IS NULL
+            OR (strftime('%s','now') - strftime('%s', last_seen)) > 3600
+          )
+        ORDER BY name ASC
+    `).all();
+
+    res.render('dashboard', { videoCount, playlistCount, deviceCount, groupCount, pendingCount, devices, offlineDevices });
 });
 
 app.listen(PORT, () => {
