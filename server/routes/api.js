@@ -20,14 +20,20 @@ router.post('/device/register', (req, res) => {
     res.status(201).json({ status: 'registered', device_id: result.lastInsertRowid });
 });
 
-// Heartbeat — atualiza last_seen
-// POST /api/device/:uuid/heartbeat
+// Heartbeat — atualiza last_seen, versão do app e vídeo em reprodução
+// POST /api/device/:uuid/heartbeat  { app_version?, current_video? }
 router.post('/device/:uuid/heartbeat', (req, res) => {
     const device = db.prepare('SELECT id FROM devices WHERE device_uuid = ?').get(req.params.uuid);
     if (!device) return res.status(404).json({ error: 'Dispositivo não encontrado.' });
 
-    db.prepare('UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE device_uuid = ?')
-      .run(req.params.uuid);
+    const { app_version, current_video } = req.body;
+    db.prepare(`
+        UPDATE devices
+        SET last_seen = CURRENT_TIMESTAMP,
+            app_version  = COALESCE(?, app_version),
+            current_video = COALESCE(?, current_video)
+        WHERE device_uuid = ?
+    `).run(app_version || null, current_video || null, req.params.uuid);
 
     res.json({ status: 'ok' });
 });

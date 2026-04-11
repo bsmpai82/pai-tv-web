@@ -54,7 +54,7 @@ class SyncService : Service() {
         val uuid = prefs.deviceUuid
         val check = api.check(uuid) ?: return
 
-        api.heartbeat(uuid)
+        api.heartbeat(uuid, BuildConfig.VERSION_NAME, prefs.currentVideo)
 
         val needsSync = check.forceSync || check.playlistHash != prefs.lastPlaylistHash
 
