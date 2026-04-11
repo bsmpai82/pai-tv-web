@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const videoRoutes = require('./routes/videos');
 const playlistRoutes = require('./routes/playlists');
 const deviceRoutes = require('./routes/devices');
+const groupRoutes = require('./routes/groups');
 const apiRoutes = require('./routes/api');
 
 const app = express();
@@ -43,6 +44,7 @@ app.use('/', authRoutes);
 app.use('/videos', requireAuth, videoRoutes);
 app.use('/playlists', requireAuth, playlistRoutes);
 app.use('/devices', requireAuth, deviceRoutes);
+app.use('/groups', requireAuth, groupRoutes);
 app.use('/api', apiRoutes);
 
 app.get('/', requireAuth, (req, res) => {

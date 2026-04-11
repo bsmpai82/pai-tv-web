@@ -42,7 +42,7 @@ router.post('/device/:uuid/heartbeat', (req, res) => {
 // GET /api/device/:uuid/check
 router.get('/device/:uuid/check', (req, res) => {
     const device = db.prepare(`
-        SELECT d.*, d.force_sync FROM devices d WHERE d.device_uuid = ?
+        SELECT * FROM devices WHERE device_uuid = ?
     `).get(req.params.uuid);
 
     if (!device) return res.status(404).json({ error: 'Dispositivo não encontrado.' });
@@ -51,15 +51,22 @@ router.get('/device/:uuid/check', (req, res) => {
     db.prepare('UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE device_uuid = ?')
       .run(req.params.uuid);
 
+    // Resolve playlist efetiva: própria ou herdada do grupo
+    let effectivePlaylistId = device.playlist_id;
+    if (!effectivePlaylistId && device.group_id) {
+        const group = db.prepare('SELECT playlist_id FROM groups WHERE id = ?').get(device.group_id);
+        effectivePlaylistId = group?.playlist_id || null;
+    }
+
     // Calcula hash da playlist atual
     let playlistHash = 'empty';
-    if (device.playlist_id) {
+    if (effectivePlaylistId) {
         const videos = db.prepare(`
             SELECT v.filename FROM videos v
             JOIN playlist_videos pv ON pv.video_id = v.id
             WHERE pv.playlist_id = ?
             ORDER BY pv.position ASC, v.id ASC
-        `).all(device.playlist_id);
+        `).all(effectivePlaylistId);
 
         playlistHash = crypto
             .createHash('md5')
@@ -80,18 +87,25 @@ router.get('/device/:uuid/playlist', (req, res) => {
     const device = db.prepare('SELECT * FROM devices WHERE device_uuid = ?').get(req.params.uuid);
     if (!device) return res.status(404).json({ error: 'Dispositivo não encontrado.' });
 
-    if (!device.playlist_id) {
+    // Resolve playlist efetiva: própria ou herdada do grupo
+    let effectivePid = device.playlist_id;
+    if (!effectivePid && device.group_id) {
+        const group = db.prepare('SELECT playlist_id FROM groups WHERE id = ?').get(device.group_id);
+        effectivePid = group?.playlist_id || null;
+    }
+
+    if (!effectivePid) {
         return res.json({ playlist: null, videos: [] });
     }
 
-    const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(device.playlist_id);
+    const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(effectivePid);
     const videos = db.prepare(`
         SELECT v.id, v.filename, v.original_name, v.size
         FROM videos v
         JOIN playlist_videos pv ON pv.video_id = v.id
         WHERE pv.playlist_id = ?
         ORDER BY pv.position ASC, v.id ASC
-    `).all(device.playlist_id);
+    `).all(effectivePid);
 
     // Zera o flag force_sync após entregar a playlist
     db.prepare('UPDATE devices SET force_sync = 0 WHERE device_uuid = ?').run(req.params.uuid);

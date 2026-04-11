@@ -21,6 +21,13 @@ const migrations = [
     `ALTER TABLE devices ADD COLUMN app_version TEXT`,
     `ALTER TABLE devices ADD COLUMN current_video TEXT`,
     `ALTER TABLE videos ADD COLUMN thumb TEXT`,
+    `CREATE TABLE IF NOT EXISTS groups (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        name       TEXT    NOT NULL UNIQUE,
+        playlist_id INTEGER REFERENCES playlists(id) ON DELETE SET NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `ALTER TABLE devices ADD COLUMN group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

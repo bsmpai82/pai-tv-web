@@ -1,0 +1,63 @@
+<%- include('partials/header', { title: 'Grupos' }) %>
+
+<h1>Grupos</h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="box">
+    <h2>Novo grupo</h2>
+    <form action="/groups" method="POST" style="display:flex;gap:8px">
+        <input type="text" name="name" placeholder="Nome do grupo (ex: Recepção)" required
+               style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px">
+        <button type="submit" class="btn btn-primary">Criar</button>
+    </form>
+</div>
+
+<div class="box">
+    <h2>Grupos (<%= groups.length %>)</h2>
+    <% if (groups.length === 0) { %>
+        <p style="color:#888">Nenhum grupo criado ainda.</p>
+    <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Playlist</th>
+                <th>Dispositivos</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        <% groups.forEach(g => { %>
+            <tr>
+                <td><%= g.name %></td>
+                <td><%= g.playlist_name || '—' %></td>
+                <td style="text-align:center"><%= g.device_count %></td>
+                <td>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                        <form action="/groups/<%= g.id %>/playlist" method="POST" style="display:flex;gap:4px">
+                            <select name="playlist_id" style="padding:4px 8px;font-size:12px;border:1px solid #ddd;border-radius:4px">
+                                <option value="">Sem playlist</option>
+                                <% playlists.forEach(p => { %>
+                                    <option value="<%= p.id %>" <%= g.playlist_id === p.id ? 'selected' : '' %>>
+                                        <%= p.name %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Atribuir</button>
+                        </form>
+                        <form action="/groups/<%= g.id %>/delete" method="POST"
+                              onsubmit="return confirm('Excluir grupo <%= g.name %>?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
