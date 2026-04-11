@@ -6,9 +6,10 @@ const router = express.Router();
 // Listagem
 router.get('/', (req, res) => {
     const devices = db.prepare(`
-        SELECT d.*, p.name AS playlist_name
+        SELECT d.*, p.name AS playlist_name, v.original_name AS current_video_name
         FROM devices d
         LEFT JOIN playlists p ON p.id = d.playlist_id
+        LEFT JOIN videos v ON v.filename = d.current_video
         ORDER BY d.registered_at DESC
     `).all();
 
