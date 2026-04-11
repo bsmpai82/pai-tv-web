@@ -1,0 +1,53 @@
+<%- include('partials/header', { title: 'Playlists' }) %>
+
+<h1>Playlists</h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="box">
+    <h2>Nova playlist</h2>
+    <form action="/playlists" method="POST" style="display:flex;gap:12px;align-items:flex-end">
+        <div class="form-row" style="margin:0;flex:1">
+            <label>Nome</label>
+            <input type="text" name="name" placeholder="Ex.: Recepção" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Criar</button>
+    </form>
+</div>
+
+<div class="box">
+    <h2>Playlists (<%= playlists.length %>)</h2>
+    <% if (playlists.length === 0) { %>
+        <p style="color:#888">Nenhuma playlist criada ainda.</p>
+    <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Vídeos</th>
+                <th>Criada em</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        <% playlists.forEach(p => { %>
+            <tr>
+                <td><a href="/playlists/<%= p.id %>"><%= p.name %></a></td>
+                <td><%= p.video_count %></td>
+                <td><%= new Date(p.created_at).toLocaleString('pt-BR') %></td>
+                <td style="display:flex;gap:8px">
+                    <a href="/playlists/<%= p.id %>" class="btn btn-primary btn-sm">Editar</a>
+                    <form action="/playlists/<%= p.id %>/delete" method="POST"
+                          onsubmit="return confirm('Excluir playlist \'<%= p.name %>\'?')">
+                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,22 @@
+[Unit]
+Description=PAI TV — Servidor de distribuição de vídeos
+After=network.target
+
+[Service]
+Type=simple
+User=paitv
+Group=paitv
+WorkingDirectory=/opt/pai-tv/server
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=10
+
+# Variáveis de ambiente (complementadas pelo .env)
+Environment=NODE_ENV=production
+
+# Limites de segurança
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

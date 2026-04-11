@@ -1,0 +1,62 @@
+<%- include('partials/header', { title: playlist.name }) %>
+
+<p><a href="/playlists">&larr; Playlists</a></p>
+<h1><%= playlist.name %></h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="box">
+    <h2>Adicionar vídeo</h2>
+    <% if (allVideos.length === 0) { %>
+        <p style="color:#888">Todos os vídeos já estão nesta playlist.</p>
+    <% } else { %>
+    <form action="/playlists/<%= playlist.id %>/videos" method="POST"
+          style="display:flex;gap:12px;align-items:flex-end">
+        <div class="form-row" style="margin:0;flex:1">
+            <label>Vídeo</label>
+            <select name="video_id" required>
+                <option value="">Selecione...</option>
+                <% allVideos.forEach(v => { %>
+                    <option value="<%= v.id %>"><%= v.original_name %></option>
+                <% }) %>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar</button>
+    </form>
+    <% } %>
+</div>
+
+<div class="box">
+    <h2>Vídeos na playlist (<%= videos.length %>)</h2>
+    <% if (videos.length === 0) { %>
+        <p style="color:#888">Nenhum vídeo nesta playlist.</p>
+    <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Tamanho</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        <% videos.forEach((v, i) => { %>
+            <tr>
+                <td><%= i + 1 %></td>
+                <td><%= v.original_name %></td>
+                <td><%= (v.size / 1024 / 1024).toFixed(1) %> MB</td>
+                <td>
+                    <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/remove" method="POST">
+                        <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                    </form>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

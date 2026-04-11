@@ -1,0 +1,97 @@
+<%- include('partials/header', { title: 'Dispositivos' }) %>
+
+<h1>Dispositivos</h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div style="margin-bottom:20px">
+    <form action="/devices/sync-all" method="POST" style="display:inline">
+        <button type="submit" class="btn btn-primary"
+                onclick="return confirm('Solicitar sync imediato para TODOS os dispositivos?')">
+            Sync todos agora
+        </button>
+    </form>
+</div>
+
+<div class="box">
+    <h2>Dispositivos registrados (<%= devices.length %>)</h2>
+    <% if (devices.length === 0) { %>
+        <p style="color:#888">Nenhum Fire Stick registrado ainda. Instale o app e ele aparecerá aqui.</p>
+    <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>UUID</th>
+                <th>Playlist</th>
+                <th>Última conexão</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        <% devices.forEach(d => { %>
+            <tr>
+                <td>
+                    <% if (!d.name) { %>
+                        <span style="color:#c0392b;font-weight:600">Pendente</span>
+                    <% } else { %>
+                        <%= d.name %>
+                    <% } %>
+                </td>
+                <td style="font-family:monospace;font-size:12px"><%= d.device_uuid.substring(0, 16) %>…</td>
+                <td><%= d.playlist_name || '—' %></td>
+                <td>
+                    <% if (d.last_seen) { %>
+                        <%= new Date(d.last_seen).toLocaleString('pt-BR') %>
+                    <% } else { %>
+                        Nunca
+                    <% } %>
+                </td>
+                <td>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+
+                        <%# Nomear %>
+                        <form action="/devices/<%= d.id %>/name" method="POST"
+                              style="display:flex;gap:4px">
+                            <input type="text" name="name" value="<%= d.name || '' %>"
+                                   placeholder="Nome da TV" style="width:120px;padding:4px 8px;font-size:12px;border:1px solid #ddd;border-radius:4px">
+                            <button type="submit" class="btn btn-primary btn-sm">OK</button>
+                        </form>
+
+                        <%# Atribuir playlist %>
+                        <form action="/devices/<%= d.id %>/playlist" method="POST"
+                              style="display:flex;gap:4px">
+                            <select name="playlist_id" style="padding:4px 8px;font-size:12px;border:1px solid #ddd;border-radius:4px">
+                                <option value="">Sem playlist</option>
+                                <% playlists.forEach(p => { %>
+                                    <option value="<%= p.id %>"
+                                        <%= d.playlist_id === p.id ? 'selected' : '' %>>
+                                        <%= p.name %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Atribuir</button>
+                        </form>
+
+                        <%# Sync individual %>
+                        <form action="/devices/<%= d.id %>/sync" method="POST">
+                            <button type="submit" class="btn btn-primary btn-sm">Sync</button>
+                        </form>
+
+                        <%# Remover %>
+                        <form action="/devices/<%= d.id %>/delete" method="POST"
+                              onsubmit="return confirm('Remover este dispositivo?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                        </form>
+
+                    </div>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
