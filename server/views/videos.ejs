@@ -7,14 +7,81 @@
 
 <div class="box">
     <h2>Enviar novo vídeo</h2>
-    <form action="/videos/upload" method="POST" enctype="multipart/form-data">
+    <form id="uploadForm" enctype="multipart/form-data">
         <div class="form-row">
             <label>Arquivo MP4 (máx. 2 GB, até 1080p, bitrate ≤ 8 Mbps)</label>
-            <input type="file" name="video" accept="video/mp4" required>
+            <input type="file" id="videoInput" name="video" accept="video/mp4" required>
         </div>
-        <button type="submit" class="btn btn-primary">Enviar</button>
+        <button type="submit" id="uploadBtn" class="btn btn-primary">Enviar</button>
     </form>
+
+    <div id="uploadProgress" style="display:none; margin-top:16px">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px">
+            <span id="uploadLabel" style="font-size:14px; color:#ccc">Enviando...</span>
+            <span id="uploadPercent" style="font-size:14px; font-weight:bold; color:#fff">0%</span>
+        </div>
+        <div style="background:#333; border-radius:6px; height:14px; overflow:hidden">
+            <div id="uploadBar" style="height:100%; width:0%; background:#4a9eff; border-radius:6px; transition:width 0.2s ease"></div>
+        </div>
+    </div>
 </div>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const file = document.getElementById('videoInput').files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('video', file);
+
+    const btn       = document.getElementById('uploadBtn');
+    const progress  = document.getElementById('uploadProgress');
+    const bar       = document.getElementById('uploadBar');
+    const percent   = document.getElementById('uploadPercent');
+    const label     = document.getElementById('uploadLabel');
+
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    progress.style.display = 'block';
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', function(e) {
+        if (!e.lengthComputable) return;
+        const pct = Math.round((e.loaded / e.total) * 100);
+        bar.style.width = pct + '%';
+        percent.textContent = pct + '%';
+        if (pct === 100) {
+            label.textContent = 'Processando vídeo...';
+        }
+    });
+
+    xhr.addEventListener('load', function() {
+        if (xhr.status >= 200 && xhr.status < 400) {
+            window.location.href = xhr.responseURL || '/videos?msg=Vídeo+enviado+com+sucesso.';
+        } else {
+            bar.style.background = '#e05';
+            label.textContent = 'Erro no envio.';
+            percent.textContent = '';
+            btn.disabled = false;
+            btn.textContent = 'Enviar';
+        }
+    });
+
+    xhr.addEventListener('error', function() {
+        bar.style.background = '#e05';
+        label.textContent = 'Falha na conexão.';
+        percent.textContent = '';
+        btn.disabled = false;
+        btn.textContent = 'Enviar';
+    });
+
+    xhr.open('POST', '/videos/upload');
+    xhr.send(formData);
+});
+</script>
 
 <div class="box">
     <h2>Vídeos armazenados (<%= videos.length %>)</h2>

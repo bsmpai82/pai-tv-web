@@ -22,6 +22,24 @@ function generateThumb(videoPath, thumbPath) {
     });
 }
 
+const MAX_BITRATE_BPS = 8 * 1000 * 1000; // 8 Mbps
+
+function getVideoBitrate(videoPath) {
+    return new Promise((resolve) => {
+        execFile('ffprobe', [
+            '-v', 'quiet',
+            '-select_streams', 'v:0',
+            '-show_entries', 'stream=bit_rate',
+            '-of', 'default=noprint_wrappers=1:nokey=1',
+            videoPath
+        ], (err, stdout) => {
+            if (err) { resolve(null); return; }
+            const bps = parseInt(stdout.trim(), 10);
+            resolve(isNaN(bps) ? null : bps);
+        });
+    });
+}
+
 const router = express.Router();
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
@@ -75,6 +93,15 @@ router.post('/upload', (req, res) => {
         const thumbName = path.basename(req.file.filename, path.extname(req.file.filename)) + '.jpg';
         const videoPath = path.resolve(process.env.VIDEOS_PATH || './uploads', req.file.filename);
         const thumbPath = path.resolve(THUMBS_PATH, thumbName);
+
+        const bitrate = await getVideoBitrate(videoPath);
+        if (bitrate !== null && bitrate > MAX_BITRATE_BPS) {
+            fs.unlinkSync(videoPath);
+            const mbps = (bitrate / 1_000_000).toFixed(1);
+            return res.redirect('/videos?err=' + encodeURIComponent(
+                `Bitrate do vídeo muito alto: ${mbps} Mbps (máx. 8 Mbps). Reexporte o vídeo com bitrate menor.`
+            ));
+        }
 
         await generateThumb(videoPath, thumbPath);
 

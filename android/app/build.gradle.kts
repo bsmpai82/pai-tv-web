@@ -15,7 +15,7 @@ android {
         versionName = "1.0"
 
         // Edite o IP/porta do servidor antes de compilar
-        buildConfigField("String", "SERVER_URL", "\"http://192.168.31.92:3000\"")
+        buildConfigField("String", "SERVER_URL", "\"http://192.168.10.59:3000\"")
     }
 
     buildFeatures {
