@@ -23,6 +23,8 @@ if (!fs.existsSync(VIDEOS_PATH)) {
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+// Necessário para req.protocol retornar 'https' atrás do Caddy
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

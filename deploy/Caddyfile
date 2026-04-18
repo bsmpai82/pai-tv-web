@@ -1,0 +1,3 @@
+paitv.com.br {
+    reverse_proxy localhost:3000
+}
