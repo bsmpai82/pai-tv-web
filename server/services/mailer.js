@@ -11,12 +11,21 @@ function createTransport() {
     });
 }
 
-function getRecipients() {
-    return db.prepare('SELECT email FROM alert_emails WHERE ativo = 1').all().map(r => r.email);
+function getRecipientsForDevice(deviceId) {
+    return db.prepare(`
+        SELECT e.email FROM alert_emails e
+        WHERE e.ativo = 1 AND (
+            e.scope = 'all'
+            OR (e.scope = 'specific' AND EXISTS (
+                SELECT 1 FROM alert_email_devices aed
+                WHERE aed.email_id = e.id AND aed.device_id = ?
+            ))
+        )
+    `).all(deviceId).map(r => r.email);
 }
 
 async function sendOfflineAlert(device) {
-    const recipients = getRecipients();
+    const recipients = getRecipientsForDevice(device.id);
     if (!recipients.length || !process.env.GMAIL_USER) return;
 
     const transporter = createTransport();
@@ -34,7 +43,7 @@ async function sendOfflineAlert(device) {
 }
 
 async function sendOnlineAlert(device) {
-    const recipients = getRecipients();
+    const recipients = getRecipientsForDevice(device.id);
     if (!recipients.length || !process.env.GMAIL_USER) return;
 
     const transporter = createTransport();

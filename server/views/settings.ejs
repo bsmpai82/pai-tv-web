@@ -21,10 +21,35 @@
         e outro quando ele volta online.
     </p>
 
-    <form action="/settings/emails" method="POST" style="display:flex;gap:8px;margin-bottom:24px">
-        <input type="email" name="email" placeholder="destinatario@email.com" required
-               style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px">
-        <button type="submit" class="btn btn-primary">Adicionar</button>
+    <form action="/settings/emails" method="POST" style="margin-bottom:24px">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input type="email" name="email" placeholder="destinatario@email.com" required
+                   style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px">
+            <button type="submit" class="btn btn-primary">Adicionar</button>
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:13px;color:#555">Receber alertas de:</span>
+            <label style="font-size:13px;cursor:pointer">
+                <input type="radio" name="scope" value="all" checked onchange="toggleDevices(this,'new')"> Todos os dispositivos
+            </label>
+            <label style="font-size:13px;cursor:pointer">
+                <input type="radio" name="scope" value="none" onchange="toggleDevices(this,'new')"> Nenhum
+            </label>
+            <label style="font-size:13px;cursor:pointer">
+                <input type="radio" name="scope" value="specific" onchange="toggleDevices(this,'new')"> Dispositivos específicos
+            </label>
+        </div>
+        <div id="devices-new" style="display:none;margin-top:10px;padding:10px;background:#f7f7f7;border-radius:4px;flex-wrap:wrap;gap:10px">
+            <% if (devices.length === 0) { %>
+                <span style="color:#888;font-size:13px">Nenhum dispositivo cadastrado ainda.</span>
+            <% } else { %>
+                <% devices.forEach(d => { %>
+                    <label style="font-size:13px;cursor:pointer;white-space:nowrap">
+                        <input type="checkbox" name="device_ids" value="<%= d.id %>"> <%= d.name %>
+                    </label>
+                <% }) %>
+            <% } %>
+        </div>
     </form>
 
     <% if (emails.length === 0) { %>
@@ -34,14 +59,64 @@
         <thead>
             <tr>
                 <th>E-mail</th>
+                <th>Dispositivos</th>
                 <th>Cadastrado em</th>
                 <th>Ação</th>
             </tr>
         </thead>
         <tbody>
         <% emails.forEach(e => { %>
+            <% const devIds = emailDeviceMap[e.id] || []; %>
+            <% const devNames = devices.filter(d => devIds.includes(d.id)).map(d => d.name); %>
             <tr>
                 <td><%= e.email %></td>
+                <td>
+                    <% if (e.scope === 'all') { %>
+                        <span style="color:#27ae60;font-size:13px">Todos</span>
+                    <% } else if (e.scope === 'none') { %>
+                        <span style="color:#999;font-size:13px">Nenhum</span>
+                    <% } else { %>
+                        <span style="font-size:13px"><%= devNames.length ? devNames.join(', ') : '(nenhum selecionado)' %></span>
+                    <% } %>
+                    <br>
+                    <details style="margin-top:4px">
+                        <summary style="font-size:12px;color:#2980b9;cursor:pointer">Editar</summary>
+                        <form action="/settings/emails/<%= e.id %>/devices" method="POST"
+                              style="margin-top:8px;padding:10px;background:#f7f7f7;border-radius:4px">
+                            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
+                                <label style="font-size:13px;cursor:pointer">
+                                    <input type="radio" name="scope" value="all"
+                                           <%= e.scope === 'all' ? 'checked' : '' %>
+                                           onchange="toggleDevices(this,'<%= e.id %>')"> Todos
+                                </label>
+                                <label style="font-size:13px;cursor:pointer">
+                                    <input type="radio" name="scope" value="none"
+                                           <%= e.scope === 'none' ? 'checked' : '' %>
+                                           onchange="toggleDevices(this,'<%= e.id %>')"> Nenhum
+                                </label>
+                                <label style="font-size:13px;cursor:pointer">
+                                    <input type="radio" name="scope" value="specific"
+                                           <%= e.scope === 'specific' ? 'checked' : '' %>
+                                           onchange="toggleDevices(this,'<%= e.id %>')"> Específicos
+                                </label>
+                            </div>
+                            <div id="devices-<%= e.id %>"
+                                 style="flex-wrap:wrap;gap:10px;margin-bottom:8px;<%= e.scope === 'specific' ? 'display:flex' : 'display:none' %>">
+                                <% if (devices.length === 0) { %>
+                                    <span style="color:#888;font-size:13px">Nenhum dispositivo cadastrado ainda.</span>
+                                <% } else { %>
+                                    <% devices.forEach(d => { %>
+                                        <label style="font-size:13px;cursor:pointer;white-space:nowrap">
+                                            <input type="checkbox" name="device_ids" value="<%= d.id %>"
+                                                   <%= devIds.includes(d.id) ? 'checked' : '' %>> <%= d.name %>
+                                        </label>
+                                    <% }) %>
+                                <% } %>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+                        </form>
+                    </details>
+                </td>
                 <td style="font-size:12px;color:#555">
                     <%= new Date(e.created_at.replace(' ', 'T') + 'Z').toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
                 </td>
@@ -57,5 +132,13 @@
     </table>
     <% } %>
 </div>
+
+<script>
+function toggleDevices(radio, id) {
+    var el = document.getElementById('devices-' + id);
+    if (!el) return;
+    el.style.display = radio.value === 'specific' ? 'flex' : 'none';
+}
+</script>
 
 <%- include('partials/footer') %>

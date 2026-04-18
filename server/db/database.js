@@ -45,6 +45,12 @@ const migrations = [
         device_id  INTEGER REFERENCES devices(id) ON DELETE SET NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
+    `ALTER TABLE alert_emails ADD COLUMN scope TEXT NOT NULL DEFAULT 'all'`,
+    `CREATE TABLE IF NOT EXISTS alert_email_devices (
+        email_id  INTEGER NOT NULL REFERENCES alert_emails(id) ON DELETE CASCADE,
+        device_id INTEGER NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+        PRIMARY KEY (email_id, device_id)
+    )`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }
