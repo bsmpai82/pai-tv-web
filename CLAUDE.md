@@ -163,10 +163,10 @@ pm2 restart all              # Reinicia o servidor
 - [x] Página de Configurações no painel para gerenciar destinatários de e-mail (`/settings`)
 - [x] Página de Logs no painel com filtros por tipo e nível (`/logs`)
 - [x] Correções de segurança: cookie `sameSite=lax` + `httpOnly`, XSS em handlers inline removido
+- [x] Autostart do app (modo kiosk) validado no IZY Play Intelbras — ver seção "Provisionar novo stick"
 
 ### Pendente
 - [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
-- [ ] Documentar processo de provisionar novo stick
 - [ ] Testar com Fire TV Stick Amazon
 
 ### Gmail configurado no VPS
@@ -208,6 +208,83 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 & "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" uninstall com.paitv
 & "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" install "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
 ```
+
+---
+
+## Provisionar novo stick (modo kiosk com autostart)
+
+Runbook validado no **IZY Play Intelbras** em 2026-04-18. O objetivo é que o stick abra o PAI TV sozinho a cada boot, sem intervenção humana.
+
+### Estratégia
+
+O app é declarado como launcher (`HOME` + `DEFAULT` no [AndroidManifest.xml](android/app/src/main/AndroidManifest.xml)). Para o sistema abri-lo automaticamente no boot, ele precisa ser o **único** HOME disponível — por isso desabilitamos o launcher do fabricante via ADB. É reversível.
+
+### Passo a passo (por stick)
+
+Preparação no stick (uma vez):
+- **Configurações → Preferências do dispositivo → Sobre** → clicar 7× em "Compilação" (habilita dev)
+- **Configurações → Preferências do dispositivo → Opções do desenvolvedor** → **Depuração ADB: ON** e **Depuração por rede: ON**
+- Anotar o IP: **Configurações → Rede e Internet → [sua Wi-Fi]**
+
+No PC (PowerShell), com `$IP` = IP do stick:
+
+```powershell
+$ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
+$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+$IP  = "192.168.31.129"  # trocar pelo IP do stick
+
+# 1. Conectar (aceitar autorização na TV na primeira vez)
+& $ADB connect "${IP}:5555"
+
+# 2. Instalar o APK (limpo)
+& $ADB uninstall com.paitv
+& $ADB install $APK
+
+# 3. Abrir o app uma vez (tira do "stopped state") — importante antes do reboot
+& $ADB shell am start -n com.paitv/.MainActivity
+
+# 4. Desabilitar o Google TV Launcher (ou o launcher do fabricante que estiver ativo)
+& $ADB shell pm disable-user --user 0 com.google.android.tvlauncher
+
+# 5. Reiniciar — ao voltar, a PAI TV abre sozinha
+& $ADB reboot
+```
+
+### Conferir qual launcher o dispositivo está usando
+
+Se o stick vier com launcher diferente (Amazon Fire Launcher, launcher da Xiaomi etc), descubra o pacote antes de desabilitar:
+
+```powershell
+& $ADB shell 'cmd package query-activities -c android.intent.category.HOME -a android.intent.action.MAIN' | Select-String "packageName="
+```
+
+Pacotes comuns a desabilitar:
+- Google/Android TV (Intelbras IZY Play, Mi Box, TCL): `com.google.android.tvlauncher`
+- Fire TV Stick: `com.amazon.tv.launcher`
+- Some TVs: `com.android.tv.launcher`
+
+### Reverter (se precisar devolver o stick ao uso normal)
+
+```powershell
+& $ADB shell pm enable com.google.android.tvlauncher
+& $ADB shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
+```
+
+### Troubleshooting — caminhos que NÃO funcionam
+
+Já testados e descartados. **Não tente novamente**:
+
+1. **`android:priority="1000"` no `<intent-filter>` de activity HOME** — o Android normaliza para 0 em apps não-system (proteção anti-hijack). O Google TV Launcher tem `priority=2` (privapp) e sempre vence. O atributo só funciona em `<receiver>` (por isso o BootReceiver o usa).
+
+2. **`cmd package set-home-activity com.paitv/.MainActivity`** — responde "Success" mas **não persiste no reboot** quando existe outro launcher com priority maior.
+
+3. **Fallback via `BootReceiver` escutando `BOOT_COMPLETED`** — após `adb install`, o app fica em "stopped state" e o Android 10+ **não entrega broadcasts implícitos** (inclusive `BOOT_COMPLETED`) até ele ser iniciado manualmente uma vez. Mesmo depois de iniciar, o Intelbras entrega o broadcast para outros receivers mas não pro nosso — comportamento inconsistente por OEM.
+
+O único método 100% confiável em Android TV / Google TV é desabilitar o launcher concorrente. O código do BootReceiver continua no projeto como "cinto de segurança" caso o launcher seja reabilitado acidentalmente.
+
+### Dica para provisionar os 10 sticks restantes em lote
+
+Coloque o bloco do passo a passo num `.ps1` parametrizado por IP e nome do dispositivo. Depois execute para cada stick — em ~2 minutos por unidade.
 
 ---
 

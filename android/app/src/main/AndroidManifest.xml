@@ -26,11 +26,21 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize"
             android:exported="true"
             android:launchMode="singleTask">
+            <!-- Entrada padrão (aparece na lista de apps do Android TV / Fire TV) -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <!-- Fire TV home screen -->
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+            <!-- Modo kiosk: app atua como launcher/HOME do dispositivo.
+                 Priority alta pra vencer o Google TV Launcher (priority=2)
+                 em dispositivos Android TV/Google TV (Intelbras, Mi Box etc).
+                 A partir daí o sistema abre o app sozinho em todo boot, sem
+                 depender de BOOT_COMPLETED. -->
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
@@ -39,11 +49,19 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- Fallback: caso o app ainda não esteja definido como launcher,
+             ouvimos broadcasts de boot de vários fabricantes. O service de
+             foreground se encarrega de subir a MainActivity (Android 10+
+             bloqueia startActivity direto do BroadcastReceiver). -->
         <receiver
             android:name=".BootReceiver"
-            android:exported="true">
-            <intent-filter>
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 

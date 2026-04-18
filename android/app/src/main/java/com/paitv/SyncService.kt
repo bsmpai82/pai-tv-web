@@ -17,6 +17,11 @@ class SyncService : Service() {
         const val NOTIFICATION_ID = 1
         const val CHECK_INTERVAL_MS = 5 * 60 * 1000L // 5 minutos
         const val ACTION_PLAYLIST_UPDATED = "com.paitv.PLAYLIST_UPDATED"
+        const val EXTRA_LAUNCH_UI = "launch_ui"
+        // Atraso para dar tempo do sistema terminar o boot antes de lançar
+        // a activity. Sem isso, alguns OEMs (Intelbras, Xiaomi) descartam
+        // a chamada.
+        private const val BOOT_LAUNCH_DELAY_MS = 4_000L
     }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -34,6 +39,15 @@ class SyncService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildNotification())
+
+        // Acionado pelo BootReceiver: precisa trazer a UI à frente. Foreground
+        // services têm permissão de startActivity em background no Android 10+.
+        if (intent?.getBooleanExtra(EXTRA_LAUNCH_UI, false) == true) {
+            scope.launch {
+                delay(BOOT_LAUNCH_DELAY_MS)
+                launchMainActivity()
+            }
+        }
 
         scope.launch {
             // Registra o dispositivo e obtém/restaura o token de autenticação
@@ -87,6 +101,22 @@ class SyncService : Service() {
                 putStringArrayListExtra("filenames", ArrayList(cachedFilenames))
             })
             Log.i("SyncService", "Sync concluído. ${cachedFilenames.size}/${videos.size} vídeo(s) em cache.")
+        }
+    }
+
+    private fun launchMainActivity() {
+        try {
+            val launch = Intent(this, MainActivity::class.java).apply {
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                )
+            }
+            startActivity(launch)
+            Log.i("SyncService", "MainActivity lançada após boot")
+        } catch (e: Exception) {
+            Log.e("SyncService", "Falha ao lançar MainActivity: ${e.message}")
         }
     }
 
