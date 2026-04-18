@@ -29,6 +29,7 @@
                 <th>Reproduzindo</th>
                 <th>Versão</th>
                 <th>Última conexão</th>
+                <th>Token</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -58,6 +59,17 @@
                         <%= new Date(d.last_seen.replace(' ', 'T') + 'Z').toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
                     <% } else { %>
                         Nunca
+                    <% } %>
+                </td>
+                <td style="font-size:11px">
+                    <% if (d.token) { %>
+                        <code style="background:#f4f4f4;padding:2px 5px;border-radius:3px;word-break:break-all"><%= d.token %></code>
+                        <button onclick="navigator.clipboard.writeText('<%= d.token %>').then(()=>this.textContent='✓').catch(()=>{})"
+                                style="margin-top:4px;display:block;font-size:11px;padding:2px 6px;cursor:pointer;border:1px solid #ccc;border-radius:3px;background:#fff">
+                            Copiar
+                        </button>
+                    <% } else { %>
+                        <span style="color:#c0392b">Sem token</span>
                     <% } %>
                 </td>
                 <td>

@@ -28,6 +28,7 @@ const migrations = [
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
     `ALTER TABLE devices ADD COLUMN group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL`,
+    `ALTER TABLE devices ADD COLUMN token TEXT UNIQUE`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

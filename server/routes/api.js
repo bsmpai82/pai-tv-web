@@ -1,55 +1,52 @@
 const express = require('express');
 const crypto = require('crypto');
 const db = require('../db/database');
+const requireDeviceToken = require('../middleware/requireDeviceToken');
 
 const router = express.Router();
 
-// Registrar dispositivo (primeira execução do app)
+// Registrar dispositivo — retorna token de autenticação
 // POST /api/device/register  { device_uuid }
 router.post('/device/register', (req, res) => {
     const { device_uuid } = req.body;
     if (!device_uuid) return res.status(400).json({ error: 'device_uuid obrigatório.' });
 
     const existing = db.prepare('SELECT * FROM devices WHERE device_uuid = ?').get(device_uuid);
-    if (existing) return res.json({ status: 'already_registered', device_id: existing.id });
+    if (existing) {
+        return res.json({ status: 'already_registered', device_id: existing.id, token: existing.token });
+    }
 
+    const token = crypto.randomUUID();
     const result = db.prepare(`
-        INSERT INTO devices (device_uuid) VALUES (?)
-    `).run(device_uuid);
+        INSERT INTO devices (device_uuid, token) VALUES (?, ?)
+    `).run(device_uuid, token);
 
-    res.status(201).json({ status: 'registered', device_id: result.lastInsertRowid });
+    res.status(201).json({ status: 'registered', device_id: result.lastInsertRowid, token });
 });
 
 // Heartbeat — atualiza last_seen, versão do app e vídeo em reprodução
 // POST /api/device/:uuid/heartbeat  { app_version?, current_video? }
-router.post('/device/:uuid/heartbeat', (req, res) => {
-    const device = db.prepare('SELECT id FROM devices WHERE device_uuid = ?').get(req.params.uuid);
-    if (!device) return res.status(404).json({ error: 'Dispositivo não encontrado.' });
-
+router.post('/device/:uuid/heartbeat', requireDeviceToken, (req, res) => {
     const { app_version, current_video } = req.body;
+
     db.prepare(`
         UPDATE devices
-        SET last_seen = CURRENT_TIMESTAMP,
-            app_version  = COALESCE(?, app_version),
+        SET last_seen     = CURRENT_TIMESTAMP,
+            app_version   = COALESCE(?, app_version),
             current_video = COALESCE(?, current_video)
-        WHERE device_uuid = ?
-    `).run(app_version || null, current_video || null, req.params.uuid);
+        WHERE id = ?
+    `).run(app_version || null, current_video || null, req.device.id);
 
     res.json({ status: 'ok' });
 });
 
 // Check — retorna hash da playlist e flag force_sync (chamado a cada 5 min pelo app)
 // GET /api/device/:uuid/check
-router.get('/device/:uuid/check', (req, res) => {
-    const device = db.prepare(`
-        SELECT * FROM devices WHERE device_uuid = ?
-    `).get(req.params.uuid);
-
-    if (!device) return res.status(404).json({ error: 'Dispositivo não encontrado.' });
+router.get('/device/:uuid/check', requireDeviceToken, (req, res) => {
+    const device = req.device;
 
     // Atualiza last_seen
-    db.prepare('UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE device_uuid = ?')
-      .run(req.params.uuid);
+    db.prepare('UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE id = ?').run(device.id);
 
     // Resolve playlist efetiva: própria ou herdada do grupo
     let effectivePlaylistId = device.playlist_id;
@@ -83,9 +80,8 @@ router.get('/device/:uuid/check', (req, res) => {
 
 // Playlist completa — retorna lista de vídeos com URLs para download
 // GET /api/device/:uuid/playlist
-router.get('/device/:uuid/playlist', (req, res) => {
-    const device = db.prepare('SELECT * FROM devices WHERE device_uuid = ?').get(req.params.uuid);
-    if (!device) return res.status(404).json({ error: 'Dispositivo não encontrado.' });
+router.get('/device/:uuid/playlist', requireDeviceToken, (req, res) => {
+    const device = req.device;
 
     // Resolve playlist efetiva: própria ou herdada do grupo
     let effectivePid = device.playlist_id;
@@ -108,7 +104,7 @@ router.get('/device/:uuid/playlist', (req, res) => {
     `).all(effectivePid);
 
     // Zera o flag force_sync após entregar a playlist
-    db.prepare('UPDATE devices SET force_sync = 0 WHERE device_uuid = ?').run(req.params.uuid);
+    db.prepare('UPDATE devices SET force_sync = 0 WHERE id = ?').run(device.id);
 
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const videosWithUrl = videos.map(v => ({
