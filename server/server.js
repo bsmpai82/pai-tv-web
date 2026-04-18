@@ -11,7 +11,9 @@ const videoRoutes = require('./routes/videos');
 const playlistRoutes = require('./routes/playlists');
 const deviceRoutes = require('./routes/devices');
 const groupRoutes = require('./routes/groups');
+const settingsRoutes = require('./routes/settings');
 const apiRoutes = require('./routes/api');
+const { startAlertChecker } = require('./services/alertChecker');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -47,6 +49,7 @@ app.use('/videos', requireAuth, videoRoutes);
 app.use('/playlists', requireAuth, playlistRoutes);
 app.use('/devices', requireAuth, deviceRoutes);
 app.use('/groups', requireAuth, groupRoutes);
+app.use('/settings', requireAuth, settingsRoutes);
 app.use('/api', apiRoutes);
 
 app.get('/', requireAuth, (req, res) => {
@@ -86,4 +89,5 @@ app.get('/', requireAuth, (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`PAI TV rodando em http://localhost:${PORT}`);
+    startAlertChecker();
 });

@@ -30,6 +30,13 @@ const migrations = [
     `ALTER TABLE devices ADD COLUMN group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL`,
     `ALTER TABLE devices ADD COLUMN token TEXT`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_token ON devices(token)`,
+    `ALTER TABLE devices ADD COLUMN offline_alert_sent INTEGER DEFAULT 0`,
+    `CREATE TABLE IF NOT EXISTS alert_emails (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        email      TEXT    NOT NULL UNIQUE,
+        ativo      INTEGER NOT NULL DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

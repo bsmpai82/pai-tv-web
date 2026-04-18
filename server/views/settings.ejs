@@ -1,0 +1,61 @@
+<%- include('partials/header', { title: 'Configurações' }) %>
+
+<h1>Configurações</h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="box">
+    <h2>Alertas por e-mail</h2>
+
+    <% if (!gmailConfigured) { %>
+        <div class="alert alert-error">
+            ⚠️ Gmail não configurado no servidor. Adicione <code>GMAIL_USER</code> e <code>GMAIL_APP_PASSWORD</code> no arquivo <code>.env</code> do servidor e reinicie.
+        </div>
+    <% } else { %>
+        <p style="color:#27ae60;margin-bottom:16px">✅ Enviando alertas por: <strong><%= gmailUser %></strong></p>
+    <% } %>
+
+    <p style="color:#555;margin-bottom:16px">
+        Um e-mail é enviado quando um dispositivo fica offline por mais de 15 minutos,
+        e outro quando ele volta online.
+    </p>
+
+    <form action="/settings/emails" method="POST" style="display:flex;gap:8px;margin-bottom:24px">
+        <input type="email" name="email" placeholder="destinatario@email.com" required
+               style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px">
+        <button type="submit" class="btn btn-primary">Adicionar</button>
+    </form>
+
+    <% if (emails.length === 0) { %>
+        <p style="color:#888">Nenhum destinatário cadastrado.</p>
+    <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>E-mail</th>
+                <th>Cadastrado em</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+        <% emails.forEach(e => { %>
+            <tr>
+                <td><%= e.email %></td>
+                <td style="font-size:12px;color:#555">
+                    <%= new Date(e.created_at.replace(' ', 'T') + 'Z').toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
+                </td>
+                <td>
+                    <form action="/settings/emails/<%= e.id %>/delete" method="POST"
+                          onsubmit="return confirm('Remover este e-mail?')">
+                        <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                    </form>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
