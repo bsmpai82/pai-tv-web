@@ -1,5 +1,6 @@
 const db = require('../db/database');
 const { sendOfflineAlert, sendOnlineAlert } = require('./mailer');
+const { log } = require('./logger');
 
 const OFFLINE_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutos
 const CHECK_INTERVAL_MS    =  5 * 60 * 1000; // verifica a cada 5 minutos
@@ -19,10 +20,14 @@ async function checkDeviceAlerts() {
             console.log(`[Alertas] ${device.name} offline — enviando e-mail.`);
             await sendOfflineAlert(device);
             db.prepare('UPDATE devices SET offline_alert_sent = 1 WHERE id = ?').run(device.id);
+            log('dispositivo', `${device.name} ficou offline`, 'alerta', device.id);
+            log('email', `Alerta de offline enviado para ${device.name}`, 'info', device.id);
         } else if (!isOffline && device.offline_alert_sent) {
             console.log(`[Alertas] ${device.name} voltou online — enviando e-mail.`);
             await sendOnlineAlert(device);
             db.prepare('UPDATE devices SET offline_alert_sent = 0 WHERE id = ?').run(device.id);
+            log('dispositivo', `${device.name} voltou online`, 'info', device.id);
+            log('email', `Alerta de online enviado para ${device.name}`, 'info', device.id);
         }
     }
 }

@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const db = require('../db/database');
 const requireDeviceToken = require('../middleware/requireDeviceToken');
+const { log } = require('../services/logger');
 
 const router = express.Router();
 
@@ -21,6 +22,7 @@ router.post('/device/register', (req, res) => {
         INSERT INTO devices (device_uuid, token) VALUES (?, ?)
     `).run(device_uuid, token);
 
+    log('dispositivo', `Novo dispositivo registrado (UUID: ${device_uuid.slice(0, 8)}...)`, 'info', result.lastInsertRowid);
     res.status(201).json({ status: 'registered', device_id: result.lastInsertRowid, token });
 });
 

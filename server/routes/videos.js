@@ -6,6 +6,7 @@ const { execFile } = require('child_process');
 const db = require('../db/database');
 
 const THUMBS_PATH = process.env.THUMBS_PATH || '/srv/pai_tv/thumbs';
+const { log } = require('../services/logger');
 
 function generateThumb(videoPath, thumbPath) {
     return new Promise((resolve) => {
@@ -110,6 +111,7 @@ router.post('/upload', (req, res) => {
             VALUES (?, ?, ?, ?)
         `).run(req.file.filename, originalName, req.file.size, thumbName);
 
+        log('video', `Vídeo enviado: ${originalName} (${(req.file.size / 1024 / 1024).toFixed(1)} MB)`);
         res.redirect('/videos?msg=Vídeo+enviado+com+sucesso.');
     });
 });

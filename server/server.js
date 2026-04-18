@@ -12,6 +12,7 @@ const playlistRoutes = require('./routes/playlists');
 const deviceRoutes = require('./routes/devices');
 const groupRoutes = require('./routes/groups');
 const settingsRoutes = require('./routes/settings');
+const logsRoutes = require('./routes/logs');
 const apiRoutes = require('./routes/api');
 const { startAlertChecker } = require('./services/alertChecker');
 
@@ -50,6 +51,7 @@ app.use('/playlists', requireAuth, playlistRoutes);
 app.use('/devices', requireAuth, deviceRoutes);
 app.use('/groups', requireAuth, groupRoutes);
 app.use('/settings', requireAuth, settingsRoutes);
+app.use('/logs', requireAuth, logsRoutes);
 app.use('/api', apiRoutes);
 
 app.get('/', requireAuth, (req, res) => {

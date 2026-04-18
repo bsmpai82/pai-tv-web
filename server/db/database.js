@@ -37,6 +37,14 @@ const migrations = [
         ativo      INTEGER NOT NULL DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
+    `CREATE TABLE IF NOT EXISTS logs (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        tipo       TEXT NOT NULL,
+        nivel      TEXT NOT NULL DEFAULT 'info',
+        mensagem   TEXT NOT NULL,
+        device_id  INTEGER REFERENCES devices(id) ON DELETE SET NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }
