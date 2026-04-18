@@ -1,103 +1,180 @@
-# CLAUDE.md
+# PAI TV Web
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Sistema de distribuição de vídeo para TVs institucionais (Sistema Android - Fire TV Stick, IZY Play Stick Intelbras e android TV) via **internet pública**.
+Esta é a versão web do projeto original `pai-tv`, que operava apenas em rede local (LAN).
 
-## Project Overview
+Repositório: https://github.com/bsmpai82/pai-tv-web
+Versão original (LAN-only, não modificar): https://github.com/bsmpai82/pai-tv
 
-**PAI TV** is a LAN-only institutional video distribution system for Fire TV Sticks. An admin panel (Node.js/Express) manages videos and playlists; Android apps on Fire Sticks poll every 5 minutes, download changed content, and play in a loop.
+---
 
-## Commands
+## Diferença fundamental em relação ao pai-tv original
 
-### Server (Node.js)
+| | pai-tv (original) | pai-tv-web (este projeto) |
+|---|---|---|
+| Rede | LAN local | Internet pública |
+| URL do servidor | IP local (ex: 192.168.1.10) | paitv.com.br (HTTPS) |
+| Autenticação | Nenhuma | Token único por dispositivo |
+| Hospedagem | PC local | VPS Hostinger Brasil |
+
+---
+
+## Infraestrutura
+
+- **VPS:** Hostinger KVM 1 — São Paulo, Brasil
+- **IP público:** 72.60.249.207
+- **Domínio:** paitv.com.br
+- **SO:** Ubuntu 24.04 LTS
+- **Node.js:** v20.20.2
+- **Banco:** SQLite (arquivo local no VPS)
+- **HTTPS:** a configurar via Caddy ou Let's Encrypt + Nginx
+
+---
+
+## Stack
+
+- **Servidor:** Node.js + Express + SQLite (pasta `server/`)
+- **Cliente Android:** Kotlin + ExoPlayer (pasta `android/`)
+- **Deploy:** scripts em `deploy/`
+
+---
+
+## Estrutura do projeto
+
+```
+pai-tv-web/
+├── server/
+│   ├── server.js        # Entry point do servidor
+│   ├── routes/          # Rotas da API
+│   ├── middleware/       # Middlewares (autenticação, etc.)
+│   ├── db/              # Banco de dados SQLite
+│   ├── views/           # Templates HTML (painel admin)
+│   ├── public/          # Arquivos estáticos
+│   ├── setup.js         # Script de setup inicial
+│   └── package.json     # Dependências
+├── android/             # App Kotlin para Fire TV Stick
+├── deploy/              # Scripts de instalação e configuração
+├── DEPLOY.md            # Guia de deploy
+└── CLAUDE.md            # Este arquivo
+```
+
+---
+
+## Arquitetura do sistema
+
+```
+[Admin - navegador] 
+        ↓ HTTPS
+[Servidor paitv.com.br - VPS Hostinger SP]
+        ↓ HTTPS (polling a cada 5 min)
+[Fire TV Sticks - qualquer rede/internet]
+```
+
+---
+
+## Dispositivos
+
+- **Quantidade inicial:** 11 Fire TV Sticks
+- **Vídeos:** arquivos MP4, menos de 500MB cada
+- **Comportamento do cliente:**
+  - Faz polling no servidor a cada 5 minutos perguntando se há vídeo novo
+  - Baixa e armazena em cache local
+  - Reproduz do cache local (funciona offline após download)
+  - Envia heartbeat periódico pro servidor (monitoramento de status)
+
+---
+
+## Autenticação
+
+Cada Fire TV Stick possui um **token único** (UUID) gerado no cadastro:
+
+- O stick envia o token em todo request HTTP (header `Authorization: Bearer <token>`)
+- O servidor valida o token antes de responder
+- Token inválido = 401 Unauthorized
+- Tokens são gerados pelo painel admin e configurados manualmente no stick na primeira instalação
+
+---
+
+## Banco de dados (SQLite)
+
+Tabelas previstas:
+
+- `devices` — id, nome, local, token, ultimo_heartbeat, grupo, ativo
+- `videos` — id, nome, caminho, tamanho, grupo, criado_em
+- `assignments` — id, video_id, device_id, baixado, criado_em
+
+---
+
+## Fluxo de trabalho (desenvolvimento)
+
+```
+1. Desenvolve e testa localmente (D:\DEV\pai-tv-web)
+2. git add / git commit / git push → GitHub
+3. No VPS: git pull → reinicia o servidor
+```
+
+Conexão com o VPS:
+```powershell
+ssh root@72.60.249.207
+```
+
+Ou via VS Code Remote SSH (recomendado):
+- Extensão: Remote - SSH (Microsoft)
+- Host configurado: root@72.60.249.207
+
+---
+
+## Comandos úteis
+
+### Locais (PowerShell no PC)
+```powershell
+cd D:\DEV\pai-tv-web        # Entra no projeto
+git status                   # Ver alterações
+git push                     # Envia pro GitHub
+```
+
+### No VPS (via SSH)
 ```bash
-cd server
-npm run dev        # Development with nodemon auto-reload
-npm start          # Production start
-node setup.js      # Interactive setup — sets ADMIN_PASSWORD_HASH in .env
+cd /root/pai-tv-web          # Pasta do projeto no servidor
+git pull                     # Atualiza do GitHub
+node server/server.js        # Roda o servidor manualmente
+pm2 start server/server.js   # Roda com PM2 (recomendado em produção)
+pm2 logs                     # Ver logs em tempo real
+pm2 restart all              # Reinicia o servidor
 ```
 
-### Android App
-Build via Android Studio: **Build > Build APK(s)**  
-Output: `android/app/build/outputs/apk/debug/app-debug.apk`
+---
 
-Deploy to Fire Stick via ADB:
-```bash
-adb connect {stick_ip}:5555
-adb install -r pai-tv.apk
-# Or batch deploy:
-bash deploy/instalar-firestick.sh 192.168.1.50 192.168.1.51 ...
-```
+## Próximos passos (MVP)
 
-### Server Deployment (Ubuntu 24.04)
-```bash
-sudo bash deploy/setup-ubuntu.sh   # One-time install: Node.js 20, systemd service, dirs
-sudo systemctl start pai-tv
-sudo systemctl status pai-tv
-```
+- [ ] Configurar HTTPS com Caddy no VPS
+- [ ] Implementar autenticação por token no servidor
+- [ ] Adicionar endpoint de heartbeat (`POST /api/heartbeat`)
+- [ ] Adicionar endpoint de polling de vídeo (`GET /api/check-update`)
+- [ ] Criar tabela `devices` no SQLite
+- [ ] Painel admin: tela de gerenciamento de dispositivos
+- [ ] Adaptar app Android: trocar URL local por `https://paitv.com.br`
+- [ ] Adicionar token nos requests do app Android
+- [ ] Instalar PM2 no VPS para manter servidor rodando
+- [ ] Documentar processo de provisionar novo stick
 
-## Architecture
+---
 
-### System Flow
-```
-Browser (Admin)
-  ↕ HTTP/EJS
-Express Server (Ubuntu /opt/pai-tv/)
-  ↕ better-sqlite3
-SQLite DB (/srv/pai_tv/pai_tv.db)
+## Restrições e decisões técnicas
 
-Fire Stick → polls GET /api/device/{uuid}/check every 5 min
-           → if hash changed: GET /api/device/{uuid}/playlist
-           → downloads missing videos via GET /media/{filename}
-           → ExoPlayer plays loop from local cache
-```
+- **Sem GUI no VPS** — administração via SSH + VS Code Remote SSH
+- **SQLite** em vez de PostgreSQL/MySQL — suficiente para 11 dispositivos, zero configuração
+- **Polling** em vez de WebSocket — mais simples, tolerante a conexões instáveis
+- **Cache local no stick** — reprodução não depende de estar online
+- **PM2** para manter o servidor Node.js rodando após reinicializações
+- Código e commits **em português**
+- Priorizar **simplicidade** — orçamento apertado, MVP de 4 semanas
 
-### Server Structure (`server/`)
-- **`server.js`** — Express app entry; mounts routes, sets up sessions, serves `/media` as static
-- **`db/database.js`** — SQLite connection + migrations (ALTER TABLE when adding columns)
-- **`db/schema.sql`** — Canonical schema for: `videos`, `playlists`, `playlist_videos`, `devices`, `groups`
-- **`routes/api.js`** — Fire Stick REST API (no auth; trusted LAN assumed)
-- **`routes/videos.js`** — Upload (Multer + ffmpeg thumbnail + ffprobe bitrate check), delete
-- **`routes/devices.js`** — Device naming, playlist assignment, force sync trigger
-- **`routes/groups.js`** — Group CRUD; devices inherit playlist from group if not directly assigned
-- **`middleware/requireAuth.js`** — Session guard for all admin routes
-- **`views/`** — EJS templates rendered server-side (no JS framework)
+---
 
-### Android Structure (`android/app/src/main/java/com/paitv/`)
-- **`SyncService.kt`** — Foreground service; polls every 5 min, calls `VideoManager.sync()`
-- **`VideoManager.kt`** — Downloads/removes files in `context.filesDir/videos/`; compares by file size
-- **`ApiClient.kt`** — OkHttp wrapper; sends device UUID header on every request
-- **`MainActivity.kt`** — Fullscreen ExoPlayer; listens for `ACTION_PLAYLIST_UPDATED` broadcast
-- **`DevicePrefs.kt`** — SharedPreferences: stores `device_uuid`, `playlist_hash`, `cached_files`
-- **`BootReceiver.kt`** — Starts MainActivity + SyncService on device reboot
+## Convenções
 
-## Key Patterns
-
-### Playlist Inheritance (Groups)
-When resolving a device's effective playlist, query both `devices.playlist_id` and `groups.playlist_id` (via `devices.group_id`). Device-level assignment takes precedence. See `routes/api.js` for the JOIN query.
-
-### Change Detection
-Server computes an MD5 hash of the playlist's filenames in order. Device caches this hash in `DevicePrefs`. On check, if hash differs → full sync; if `force_sync = 1` → also full sync (reset after sync).
-
-### Video Upload Constraints
-- MIME must be `video/mp4`; max 2 GB
-- ffprobe enforces ≤ 8 Mbps bitrate
-- ffmpeg generates a JPEG thumbnail at 320px wide
-- Stored as `{timestamp}-{random}.mp4` under `/srv/pai_tv/videos/`
-
-### Environment (Server `.env`)
-```
-PORT=3000
-SESSION_SECRET=<long random string>
-ADMIN_PASSWORD_HASH=<bcrypt hash from setup.js>
-VIDEOS_PATH=/srv/pai_tv/videos
-DB_PATH=/srv/pai_tv/pai_tv.db
-```
-
-### Android Build Config
-Server URL is set as a `BuildConfig` field in `app/build.gradle.kts`. HTTP cleartext is allowed via `res/xml/network_security_config.xml` (LAN-only; no HTTPS required).
-
-## Database Schema Key Points
-- `playlist_videos` uses `position` column for video ordering within a playlist
-- `devices.force_sync` is set to `1` when admin assigns/changes a playlist; reset after device acknowledges
-- `devices.last_seen` is updated on every `/check` and `/heartbeat` call; online = updated within 10 minutes
-- Schema migrations live in `db/database.js` as conditional `ALTER TABLE` statements (not in `schema.sql`)
+- Commits: `tipo: descrição curta` (ex: `feat: adiciona endpoint de heartbeat`)
+- Tipos: `feat`, `fix`, `docs`, `refactor`, `chore`
+- Comentários no código: português
+- Variáveis e funções: camelCase em inglês
