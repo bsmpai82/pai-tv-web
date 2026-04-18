@@ -145,18 +145,59 @@ pm2 restart all              # Reinicia o servidor
 
 ---
 
-## Próximos passos (MVP)
+## Status do MVP (atualizado em 2026-04-18)
 
-- [ ] Configurar HTTPS com Caddy no VPS
-- [ ] Implementar autenticação por token no servidor
-- [ ] Adicionar endpoint de heartbeat (`POST /api/heartbeat`)
-- [ ] Adicionar endpoint de polling de vídeo (`GET /api/check-update`)
-- [ ] Criar tabela `devices` no SQLite
-- [ ] Painel admin: tela de gerenciamento de dispositivos
-- [ ] Adaptar app Android: trocar URL local por `https://paitv.com.br`
-- [ ] Adicionar token nos requests do app Android
-- [ ] Instalar PM2 no VPS para manter servidor rodando
+### Concluído ✅
+- [x] Configurar HTTPS com Caddy no VPS (`deploy/Caddyfile` + `deploy/setup-caddy.sh`)
+- [x] Implementar autenticação por token no servidor (`server/middleware/requireDeviceToken.js`)
+- [x] Endpoint de heartbeat (`POST /api/device/:uuid/heartbeat`)
+- [x] Endpoint de polling de vídeo (`GET /api/device/:uuid/check`)
+- [x] Tabela `devices` no SQLite com token único por dispositivo
+- [x] Painel admin completo: vídeos, playlists, grupos, dispositivos
+- [x] Adaptar app Android: URL `https://paitv.com.br`, token Bearer, HTTPS obrigatório
+- [x] Token gerado no registro e exibido no painel admin com botão copiar
+- [x] PM2 instalado e configurado para iniciar com o sistema
+- [x] Ícone PAI TV no app Android
+- [x] Testado com stick Intelbras IZY Play via internet pública
+
+### Pendente
+- [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
 - [ ] Documentar processo de provisionar novo stick
+- [ ] Testar com Fire TV Stick Amazon
+
+---
+
+## Infraestrutura atual
+
+- **VPS:** Hostinger KVM 1 — São Paulo, Brasil
+- **IP público:** 72.60.249.207
+- **Domínio:** paitv.com.br (DNS configurado no Registro.br → IP do VPS)
+- **HTTPS:** Caddy 2.11.2 com Let's Encrypt automático
+- **Node.js:** rodando via PM2 em `/root/pai-tv-web/server`
+- **Banco:** SQLite em `/root/pai-tv-web/server/db/pai_tv.db`
+- **Vídeos:** `/root/pai-tv-web/server/uploads/`
+- **Thumbnails:** `/srv/pai_tv/thumbs/`
+
+## Build do APK Android
+
+```powershell
+# No terminal do Android Studio (Windows)
+cd D:\DEV\pai-tv-web\android
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+.\gradlew.bat assembleDebug
+# APK gerado em: app\build\outputs\apk\debug\app-debug.apk
+```
+
+## Instalar APK no stick via ADB
+
+```powershell
+# Conectar (aceitar autorização na TV)
+& "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" connect <IP-do-stick>
+
+# Instalar (desinstala versão anterior se necessário)
+& "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" uninstall com.paitv
+& "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" install "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+```
 
 ---
 
@@ -167,6 +208,8 @@ pm2 restart all              # Reinicia o servidor
 - **Polling** em vez de WebSocket — mais simples, tolerante a conexões instáveis
 - **Cache local no stick** — reprodução não depende de estar online
 - **PM2** para manter o servidor Node.js rodando após reinicializações
+- **Caddy** como proxy reverso HTTPS (certificado Let's Encrypt automático)
+- **Token por dispositivo** — UUID gerado no servidor no momento do registro
 - Código e commits **em português**
 - Priorizar **simplicidade** — orçamento apertado, MVP de 4 semanas
 
