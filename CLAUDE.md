@@ -159,11 +159,21 @@ pm2 restart all              # Reinicia o servidor
 - [x] PM2 instalado e configurado para iniciar com o sistema
 - [x] Ícone PAI TV no app Android
 - [x] Testado com stick Intelbras IZY Play via internet pública
+- [x] Alertas por e-mail quando dispositivo fica offline (>15 min) ou volta online (`server/services/mailer.js` + `alertChecker.js`)
+- [x] Página de Configurações no painel para gerenciar destinatários de e-mail (`/settings`)
+- [x] Página de Logs no painel com filtros por tipo e nível (`/logs`)
+- [x] Correções de segurança: cookie `sameSite=lax` + `httpOnly`, XSS em handlers inline removido
 
 ### Pendente
 - [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
 - [ ] Documentar processo de provisionar novo stick
 - [ ] Testar com Fire TV Stick Amazon
+
+### Gmail configurado no VPS
+- **Conta:** paitv000001@gmail.com
+- **Método:** senha de app (Google App Password — 2FA ativo)
+- **Variáveis no `.env`:** `GMAIL_USER` e `GMAIL_APP_PASSWORD`
+- Destinatários gerenciados em `https://paitv.com.br/settings`
 
 ---
 
