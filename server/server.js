@@ -42,7 +42,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'pai-tv-secret-change-me',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 8 * 60 * 60 * 1000 } // 8 horas
+    cookie: { maxAge: 8 * 60 * 60 * 1000, sameSite: 'lax', httpOnly: true } // 8 horas
 }));
 
 app.use('/', authRoutes);

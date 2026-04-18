@@ -47,8 +47,8 @@
                             </select>
                             <button type="submit" class="btn btn-primary btn-sm">Atribuir</button>
                         </form>
-                        <form action="/groups/<%= g.id %>/delete" method="POST"
-                              onsubmit="return confirm('Excluir grupo <%= g.name %>?')">
+                        <form action="/groups/<%= g.id %>/delete" method="POST" class="form-confirm"
+                              data-msg="Excluir grupo <%= encodeURIComponent(g.name) %>?">
                             <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
                         </form>
                     </div>
@@ -60,4 +60,12 @@
     <% } %>
 </div>
 
+<script>
+document.querySelectorAll('.form-confirm').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        var msg = decodeURIComponent(form.dataset.msg);
+        if (!confirm(msg)) e.preventDefault();
+    });
+});
+</script>
 <%- include('partials/footer') %>
