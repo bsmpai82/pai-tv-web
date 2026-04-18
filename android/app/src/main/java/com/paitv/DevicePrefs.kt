@@ -23,6 +23,11 @@ class DevicePrefs(context: Context) {
         get() = prefs.getStringSet("cached_files", emptySet()) ?: emptySet()
         set(value) = prefs.edit().putStringSet("cached_files", value).apply()
 
+    /** Token de autenticação recebido do servidor no registro. */
+    var deviceToken: String?
+        get() = prefs.getString("device_token", null)
+        set(value) = prefs.edit().putString("device_token", value).apply()
+
     /** Nome do vídeo atualmente em reprodução (para reportar ao servidor). */
     var currentVideo: String?
         get() = prefs.getString("current_video", null)

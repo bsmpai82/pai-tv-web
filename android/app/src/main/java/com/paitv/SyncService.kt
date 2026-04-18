@@ -36,8 +36,11 @@ class SyncService : Service() {
         startForeground(NOTIFICATION_ID, buildNotification())
 
         scope.launch {
-            // Registra o dispositivo (idempotente)
-            api.register(prefs.deviceUuid)
+            // Registra o dispositivo e obtém/restaura o token de autenticação
+            val token = prefs.deviceToken ?: api.register(prefs.deviceUuid)?.also {
+                prefs.deviceToken = it
+            }
+            api.token = token
 
             // Loop de verificação a cada 5 minutos
             while (isActive) {

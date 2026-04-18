@@ -29,7 +29,15 @@ data class PlaylistResponse(
     val videos: List<VideoItem>,
 )
 
+private data class RegisterResponse(
+    val status: String,
+    @SerializedName("device_id") val deviceId: Int,
+    val token: String?,
+)
+
 class ApiClient(private val baseUrl: String) {
+
+    var token: String? = null
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
@@ -39,14 +47,22 @@ class ApiClient(private val baseUrl: String) {
     private val gson = Gson()
     private val json = "application/json".toMediaType()
 
-    fun register(deviceUuid: String): Boolean = runCatching {
+    private fun Request.Builder.addAuth(): Request.Builder =
+        token?.let { header("Authorization", "Bearer $it") } ?: this
+
+    /** Registra o dispositivo e retorna o token de autenticação. */
+    fun register(deviceUuid: String): String? = runCatching {
         val body = """{"device_uuid":"$deviceUuid"}""".toRequestBody(json)
         val req = Request.Builder().url("$baseUrl/api/device/register").post(body).build()
-        client.newCall(req).execute().use { it.isSuccessful || it.code == 409 }
-    }.getOrDefault(false)
+        client.newCall(req).execute().use { resp ->
+            if (!resp.isSuccessful) return null
+            gson.fromJson(resp.body!!.string(), RegisterResponse::class.java).token
+        }
+    }.getOrNull()
 
     fun check(deviceUuid: String): CheckResponse? = runCatching {
-        val req = Request.Builder().url("$baseUrl/api/device/$deviceUuid/check").get().build()
+        val req = Request.Builder().url("$baseUrl/api/device/$deviceUuid/check")
+            .addAuth().get().build()
         client.newCall(req).execute().use { resp ->
             if (!resp.isSuccessful) return null
             gson.fromJson(resp.body!!.string(), CheckResponse::class.java)
@@ -54,7 +70,8 @@ class ApiClient(private val baseUrl: String) {
     }.getOrNull()
 
     fun getPlaylist(deviceUuid: String): PlaylistResponse? = runCatching {
-        val req = Request.Builder().url("$baseUrl/api/device/$deviceUuid/playlist").get().build()
+        val req = Request.Builder().url("$baseUrl/api/device/$deviceUuid/playlist")
+            .addAuth().get().build()
         client.newCall(req).execute().use { resp ->
             if (!resp.isSuccessful) return null
             gson.fromJson(resp.body!!.string(), PlaylistResponse::class.java)
@@ -70,13 +87,14 @@ class ApiClient(private val baseUrl: String) {
             append("}")
         }
         val body = payload.toRequestBody(json)
-        val req = Request.Builder().url("$baseUrl/api/device/$deviceUuid/heartbeat").post(body).build()
+        val req = Request.Builder().url("$baseUrl/api/device/$deviceUuid/heartbeat")
+            .addAuth().post(body).build()
         client.newCall(req).execute().close()
     }
 
     /** Faz download de um vídeo e escreve no arquivo de destino. */
     fun downloadVideo(url: String, destFile: java.io.File, onProgress: (Long, Long) -> Unit) {
-        val req = Request.Builder().url(url).get().build()
+        val req = Request.Builder().url(url).addAuth().get().build()
         client.newCall(req).execute().use { resp ->
             if (!resp.isSuccessful) error("HTTP ${resp.code}")
             val body = resp.body ?: error("Corpo vazio")
