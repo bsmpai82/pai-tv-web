@@ -51,6 +51,11 @@ const migrations = [
         device_id INTEGER NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
         PRIMARY KEY (email_id, device_id)
     )`,
+    `CREATE TABLE IF NOT EXISTS settings (
+        key        TEXT PRIMARY KEY,
+        value      TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

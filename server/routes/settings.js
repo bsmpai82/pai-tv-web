@@ -1,5 +1,8 @@
 const express = require('express');
+const fs = require('fs');
 const db = require('../db/database');
+const settingsStore = require('../services/settingsStore');
+const { apkFilePath } = require('./apk');
 
 const router = express.Router();
 
@@ -21,12 +24,22 @@ router.get('/', (req, res) => {
         ).all(e.id).map(r => r.device_id);
     }
 
+    const apkToken = settingsStore.get('apk_download_token');
+    let apkInfo = null;
+    try {
+        const st = fs.statSync(apkFilePath());
+        apkInfo = { size: st.size, mtime: st.mtime };
+    } catch { /* APK ainda não foi enviado */ }
+
     res.render('settings', {
         emails,
         devices,
         emailDeviceMap,
         gmailConfigured: !!(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD),
         gmailUser: process.env.GMAIL_USER || '',
+        apkToken,
+        apkInfo,
+        baseUrl: `${req.protocol}://${req.get('host')}`,
         message: req.query.msg || null,
         error: req.query.err || null,
     });

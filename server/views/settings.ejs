@@ -6,6 +6,66 @@
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="box">
+    <h2>Distribuição do APK</h2>
+
+    <p style="color:#555;margin-bottom:16px">
+        Hospedagem do APK para instalação remota em TVs Android fora da rede local.
+        Para Fire TV Stick e IZY Play próximos, prefira instalação via ADB na LAN.
+    </p>
+
+    <% if (apkInfo) { %>
+        <p style="margin-bottom:8px">
+            <strong>APK disponível:</strong>
+            <%= (apkInfo.size / 1024 / 1024).toFixed(1) %> MB —
+            enviado em <%= new Date(apkInfo.mtime).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
+        </p>
+    <% } else { %>
+        <p style="color:#c0392b;margin-bottom:8px">
+            ⚠️ Nenhum APK enviado ainda. Faça upload abaixo para habilitar o download remoto.
+        </p>
+    <% } %>
+
+    <% if (apkToken) { %>
+        <label style="display:block;font-size:13px;color:#555;margin-top:12px;margin-bottom:4px">
+            Link para instalar o APK (digite no Downloader ou file manager da TV):
+        </label>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input id="apk-url" type="text" readonly
+                   value="<%= baseUrl %>/apk/<%= apkToken %>"
+                   style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:monospace;background:#f7f7f7">
+            <button type="button" class="btn btn-primary" onclick="copyApkUrl()">Copiar</button>
+        </div>
+        <p style="font-size:12px;color:#888;margin-bottom:16px">
+            Token atual: <code><%= apkToken %></code>.
+            Se o link vazar, clique em "Rotacionar" abaixo para invalidá-lo.
+        </p>
+    <% } %>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+        <form action="/apk/upload" method="POST" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center">
+            <input type="file" name="apk" accept=".apk" required
+                   style="font-size:13px">
+            <button type="submit" class="btn btn-primary">Enviar novo APK</button>
+        </form>
+        <form action="/apk/rotate-token" method="POST"
+              onsubmit="return confirm('Rotacionar o token invalida todos os links de download anteriores. Continuar?')">
+            <button type="submit" class="btn btn-danger">Rotacionar token</button>
+        </form>
+    </div>
+
+    <details style="font-size:13px;color:#555">
+        <summary style="cursor:pointer;color:#2980b9">Como instalar na TV remota</summary>
+        <ol style="margin-top:8px;padding-left:20px;line-height:1.6">
+            <li>Na TV, habilite "Fontes desconhecidas" / "Apps de origens desconhecidas" nas configurações.</li>
+            <li>Instale o app <strong>Downloader</strong> (by AFTVnews) pela Play Store / Amazon App Store.</li>
+            <li>Abra o Downloader, digite o link acima no campo de URL e clique em "Go".</li>
+            <li>Quando o download terminar, aceite o prompt de instalação.</li>
+            <li>O app PAI TV aparecerá como um aplicativo instalado — o cadastro do dispositivo acontece na primeira abertura.</li>
+        </ol>
+    </details>
+</div>
+
+<div class="box">
     <h2>Alertas por e-mail</h2>
 
     <% if (!gmailConfigured) { %>
@@ -138,6 +198,18 @@ function toggleDevices(radio, id) {
     var el = document.getElementById('devices-' + id);
     if (!el) return;
     el.style.display = radio.value === 'specific' ? 'flex' : 'none';
+}
+
+function copyApkUrl() {
+    var input = document.getElementById('apk-url');
+    if (!input) return;
+    input.select();
+    input.setSelectionRange(0, 99999);
+    try {
+        navigator.clipboard.writeText(input.value);
+    } catch {
+        document.execCommand('copy');
+    }
 }
 </script>
 

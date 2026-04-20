@@ -164,6 +164,7 @@ pm2 restart all              # Reinicia o servidor
 - [x] Página de Logs no painel com filtros por tipo e nível (`/logs`)
 - [x] Correções de segurança: cookie `sameSite=lax` + `httpOnly`, XSS em handlers inline removido
 - [x] Autostart do app (modo kiosk) validado no IZY Play Intelbras — ver seção "Provisionar novo stick"
+- [x] Distribuição remota do APK via `paitv.com.br/apk/<token>` — ver seção "Distribuição do APK (instalação remota)"
 
 ### Pendente
 - [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
@@ -285,6 +286,77 @@ O único método 100% confiável em Android TV / Google TV é desabilitar o laun
 ### Dica para provisionar os 10 sticks restantes em lote
 
 Coloque o bloco do passo a passo num `.ps1` parametrizado por IP e nome do dispositivo. Depois execute para cada stick — em ~2 minutos por unidade.
+
+---
+
+## Distribuição do APK (instalação remota)
+
+Dois caminhos convivem, usando o **mesmo APK de build**:
+
+| Caminho | Usar quando | Como |
+|---|---|---|
+| **A — ADB na LAN** | Sticks que você tem fisicamente (Fire TV, IZY Play) | Runbook de "Provisionar novo stick" acima |
+| **B — Download via URL** | Android TV remota, fora da sua LAN | Upload do APK no painel → TV baixa via Downloader |
+
+### Como funciona o caminho B
+
+- APK hospedado em `/srv/pai_tv/releases/pai-tv.apk` no VPS (fora do git, fora de `/uploads`).
+- Rota pública `GET /apk/<token>` serve o arquivo; token é gerado automaticamente no primeiro boot e guardado na tabela `settings`.
+- Upload e rotação do token no painel admin, página `/settings`, card **"Distribuição do APK"**.
+- Cada download é logado na tabela `logs` (tipo `apk`).
+
+### Fluxo de release
+
+```
+1. gradlew.bat assembleDebug (local)
+2. Upload do app-debug.apk no painel /settings
+3. Compartilhar o link paitv.com.br/apk/<token> com o operador da TV remota
+4. Na TV: Downloader → digitar URL → instalar
+```
+
+### Na TV remota (passo a passo do operador)
+
+1. Habilitar "Fontes desconhecidas" nas configurações da TV (Android TV costuma perguntar no ato da instalação).
+2. Instalar o app **Downloader** (by AFTVnews) — disponível na Play Store e na Amazon App Store.
+3. Abrir o Downloader, digitar a URL fornecida (`paitv.com.br/apk/<token>`), clicar em Go.
+4. Aceitar o prompt de instalação quando o download terminar.
+5. Abrir o PAI TV uma vez — o cadastro do dispositivo acontece automaticamente.
+
+### Rotacionar o token
+
+Se o link vazar ou após demitir/trocar operador: painel admin → `/settings` → "Rotacionar token". Todos os links antigos param de funcionar imediatamente.
+
+### Limitações conhecidas
+
+- **Autostart/kiosk em TV remota** ainda depende de ADB (`pm disable-user` no launcher concorrente). Sem LAN e sem VPN, a TV remota **não inicia o PAI TV sozinha** — o operador precisa abrir manualmente. Solução opcional: Tailscale (VPN mesh) instalado no stick pela Play Store, dá IP fixo e permite ADB por WAN.
+- APK é **debug-signed**. Se um dia migrar para release-signed, o update em cima do debug falha com `INSTALL_FAILED_UPDATE_INCOMPATIBLE` — precisa desinstalar antes.
+- Tamanho máximo do upload: 100 MB (definido em `server/routes/apk.js`).
+
+### Arquivos envolvidos
+
+- [server/routes/apk.js](server/routes/apk.js) — rotas `/apk/:token`, `/apk/upload`, `/apk/rotate-token`
+- [server/services/settingsStore.js](server/services/settingsStore.js) — get/set na tabela `settings`
+- [server/views/settings.ejs](server/views/settings.ejs) — card de distribuição na página `/settings`
+- Tabela `settings` (migração em [server/db/database.js](server/db/database.js))
+
+### Variáveis de ambiente
+
+Opcional em `.env` do VPS (valor padrão entre parênteses):
+```
+RELEASES_PATH=/srv/pai_tv/releases    # (./releases)
+```
+
+O token de download **não** é variável de ambiente — fica na tabela `settings` pra poder ser rotacionado pelo painel.
+
+### Deploy no VPS após primeiro deploy desta feature
+
+```bash
+cd /root/pai-tv-web
+git pull
+mkdir -p /srv/pai_tv/releases
+pm2 restart all
+# Abrir https://paitv.com.br/settings e fazer upload do APK inicial
+```
 
 ---
 

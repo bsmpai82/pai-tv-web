@@ -14,6 +14,7 @@ const groupRoutes = require('./routes/groups');
 const settingsRoutes = require('./routes/settings');
 const logsRoutes = require('./routes/logs');
 const apiRoutes = require('./routes/api');
+const { router: apkRoutes, ensureApkToken } = require('./routes/apk');
 const { startAlertChecker } = require('./services/alertChecker');
 
 const app = express();
@@ -53,6 +54,7 @@ app.use('/groups', requireAuth, groupRoutes);
 app.use('/settings', requireAuth, settingsRoutes);
 app.use('/logs', requireAuth, logsRoutes);
 app.use('/api', apiRoutes);
+app.use('/apk', apkRoutes);
 
 app.get('/', requireAuth, (req, res) => {
     const videoCount    = db.prepare('SELECT COUNT(*) AS n FROM videos').get().n;
@@ -91,5 +93,6 @@ app.get('/', requireAuth, (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`PAI TV rodando em http://localhost:${PORT}`);
+    ensureApkToken();
     startAlertChecker();
 });
