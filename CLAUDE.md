@@ -105,30 +105,49 @@ Tabelas previstas:
 
 ---
 
+## Ambientes de desenvolvimento
+
+| | Desktop Windows (casa) | Desktop Linux (trabalho) |
+|---|---|---|
+| **Usuário** | Dimozi | pai-tv |
+| **Projeto** | `D:\DEV\pai-tv-web` | `/home/pai-tv/pai-tv-web` |
+| **Uso principal** | Desenvolvimento, build do APK | Provisionar sticks via ADB |
+| **Android SDK** | `C:\Users\Dimozi\AppData\Local\Android\Sdk` | `/home/pai-tv/Android/Sdk` |
+| **ADB** | `platform-tools\adb.exe` | `adb` (no PATH) |
+
+---
+
 ## Fluxo de trabalho (desenvolvimento)
 
 ```
-1. Desenvolve e testa localmente (D:\DEV\pai-tv-web)
+1. Desenvolve e testa localmente (Windows ou Linux)
 2. git add / git commit / git push → GitHub
 3. No VPS: git pull → reinicia o servidor
 ```
 
 Conexão com o VPS:
-```powershell
+```bash
 ssh root@72.60.249.207
 ```
 
 Ou via VS Code Remote SSH (recomendado):
 - Extensão: Remote - SSH (Microsoft)
-- Host configurado: root@72.60.249.207
+- Host configurado: `root@72.60.249.207`
 
 ---
 
 ## Comandos úteis
 
-### Locais (PowerShell no PC)
+### Locais — Windows (PowerShell)
 ```powershell
 cd D:\DEV\pai-tv-web        # Entra no projeto
+git status                   # Ver alterações
+git push                     # Envia pro GitHub
+```
+
+### Locais — Linux (trabalho)
+```bash
+cd ~/pai-tv-web              # Entra no projeto
 git status                   # Ver alterações
 git push                     # Envia pro GitHub
 ```
@@ -191,23 +210,38 @@ pm2 restart all              # Reinicia o servidor
 
 ## Build do APK Android
 
+### Windows (casa)
 ```powershell
-# No terminal do Android Studio (Windows)
 cd D:\DEV\pai-tv-web\android
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 .\gradlew.bat assembleDebug
 # APK gerado em: app\build\outputs\apk\debug\app-debug.apk
 ```
 
+### Linux (trabalho)
+```bash
+cd ~/pai-tv-web/android
+./gradlew assembleDebug
+# APK gerado em: app/build/outputs/apk/debug/app-debug.apk
+```
+
 ## Instalar APK no stick via ADB
 
+### Windows (casa)
 ```powershell
-# Conectar (aceitar autorização na TV)
-& "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" connect <IP-do-stick>
+$ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
+$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+& $ADB connect <IP-do-stick>:5555
+& $ADB uninstall com.paitv
+& $ADB install $APK
+```
 
-# Instalar (desinstala versão anterior se necessário)
-& "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" uninstall com.paitv
-& "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe" install "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+### Linux (trabalho)
+```bash
+APK=~/pai-tv-web/android/app/build/outputs/apk/debug/app-debug.apk
+adb connect <IP-do-stick>:5555
+adb uninstall com.paitv
+adb install $APK
 ```
 
 ---
@@ -227,35 +261,46 @@ Preparação no stick (uma vez):
 - **Configurações → Preferências do dispositivo → Opções do desenvolvedor** → **Depuração ADB: ON** e **Depuração por rede: ON**
 - Anotar o IP: **Configurações → Rede e Internet → [sua Wi-Fi]**
 
-No PC (PowerShell), com `$IP` = IP do stick:
+### Windows (casa)
 
 ```powershell
 $ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
 $APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
 $IP  = "192.168.31.129"  # trocar pelo IP do stick
 
-# 1. Conectar (aceitar autorização na TV na primeira vez)
 & $ADB connect "${IP}:5555"
-
-# 2. Instalar o APK (limpo)
 & $ADB uninstall com.paitv
 & $ADB install $APK
-
-# 3. Abrir o app uma vez (tira do "stopped state") — importante antes do reboot
 & $ADB shell am start -n com.paitv/.MainActivity
-
-# 4. Desabilitar o Google TV Launcher (ou o launcher do fabricante que estiver ativo)
 & $ADB shell pm disable-user --user 0 com.google.android.tvlauncher
-
-# 5. Reiniciar — ao voltar, a PAI TV abre sozinha
 & $ADB reboot
+```
+
+### Linux (trabalho)
+
+```bash
+IP="192.168.10.194"   # trocar pelo IP do stick
+APK=~/pai-tv-web/android/app/build/outputs/apk/debug/app-debug.apk
+
+adb connect ${IP}:5555
+adb uninstall com.paitv
+adb install $APK
+adb shell am start -n com.paitv/.MainActivity
+adb shell pm disable-user --user 0 com.google.android.tvlauncher
+adb reboot
 ```
 
 ### Conferir qual launcher o dispositivo está usando
 
-Se o stick vier com launcher diferente (Amazon Fire Launcher, launcher da Xiaomi etc), descubra o pacote antes de desabilitar:
+Se o stick vier com launcher diferente, descubra o pacote antes de desabilitar:
+
+```bash
+# Linux
+adb shell 'cmd package query-activities -c android.intent.category.HOME -a android.intent.action.MAIN' | grep packageName
+```
 
 ```powershell
+# Windows
 & $ADB shell 'cmd package query-activities -c android.intent.category.HOME -a android.intent.action.MAIN' | Select-String "packageName="
 ```
 
