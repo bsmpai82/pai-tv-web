@@ -78,11 +78,12 @@ class ApiClient(private val baseUrl: String) {
         }
     }.getOrNull()
 
-    fun heartbeat(deviceUuid: String, appVersion: String? = null, currentVideo: String? = null) = runCatching {
+    fun heartbeat(deviceUuid: String, appVersion: String? = null, currentVideo: String? = null, localIp: String? = null) = runCatching {
         val payload = buildString {
             append("{")
             appVersion?.let { append("\"app_version\":\"$it\",") }
             currentVideo?.let { append("\"current_video\":\"$it\",") }
+            localIp?.let { append("\"local_ip\":\"$it\",") }
             if (endsWith(",")) deleteCharAt(length - 1)
             append("}")
         }

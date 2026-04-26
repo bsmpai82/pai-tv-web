@@ -21,6 +21,7 @@ const migrations = [
     `ALTER TABLE devices ADD COLUMN app_version TEXT`,
     `ALTER TABLE devices ADD COLUMN current_video TEXT`,
     `ALTER TABLE videos ADD COLUMN thumb TEXT`,
+    `ALTER TABLE devices ADD COLUMN local_ip TEXT`,
     `CREATE TABLE IF NOT EXISTS groups (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
         name       TEXT    NOT NULL UNIQUE,

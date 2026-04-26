@@ -4,11 +4,13 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
+import java.net.InetAddress
 
 class SyncService : Service() {
 
@@ -71,7 +73,8 @@ class SyncService : Service() {
         val uuid = prefs.deviceUuid
         val check = api.check(uuid) ?: return
 
-        api.heartbeat(uuid, BuildConfig.VERSION_NAME, prefs.currentVideo)
+        val localIp = getLocalIpAddress()
+        api.heartbeat(uuid, BuildConfig.VERSION_NAME, prefs.currentVideo, localIp)
 
         val needsSync = check.forceSync || check.playlistHash != prefs.lastPlaylistHash
 
@@ -137,6 +140,20 @@ class SyncService : Service() {
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }
+
+    private fun getLocalIpAddress(): String? = runCatching {
+        val wifiMgr = getSystemService(android.content.Context.WIFI_SERVICE) as? WifiManager
+        val connectionInfo = wifiMgr?.connectionInfo ?: return@runCatching null
+        val ipAddress = connectionInfo.ipAddress
+        // Converte do inteiro little-endian para notação decimal
+        if (ipAddress == 0) return@runCatching null
+        String.format("%d.%d.%d.%d", 
+            ipAddress and 0xff,
+            ipAddress shr 8 and 0xff,
+            ipAddress shr 16 and 0xff,
+            ipAddress shr 24 and 0xff
+        )
+    }.getOrNull()
 
     private fun buildNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle(getString(R.string.notification_title))

@@ -26,18 +26,19 @@ router.post('/device/register', (req, res) => {
     res.status(201).json({ status: 'registered', device_id: result.lastInsertRowid, token });
 });
 
-// Heartbeat — atualiza last_seen, versão do app e vídeo em reprodução
-// POST /api/device/:uuid/heartbeat  { app_version?, current_video? }
+// Heartbeat — atualiza last_seen, versão do app, vídeo em reprodução e IP local
+// POST /api/device/:uuid/heartbeat  { app_version?, current_video?, local_ip? }
 router.post('/device/:uuid/heartbeat', requireDeviceToken, (req, res) => {
-    const { app_version, current_video } = req.body;
+    const { app_version, current_video, local_ip } = req.body;
 
     db.prepare(`
         UPDATE devices
         SET last_seen     = CURRENT_TIMESTAMP,
             app_version   = COALESCE(?, app_version),
-            current_video = COALESCE(?, current_video)
+            current_video = COALESCE(?, current_video),
+            local_ip      = COALESCE(?, local_ip)
         WHERE id = ?
-    `).run(app_version || null, current_video || null, req.device.id);
+    `).run(app_version || null, current_video || null, local_ip || null, req.device.id);
 
     res.json({ status: 'ok' });
 });
