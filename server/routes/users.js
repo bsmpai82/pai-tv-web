@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const db = require('../db/database');
 const requireRole = require('../middleware/requireRole');
+const { sendWelcomeEmail } = require('../services/mailer');
 const router = express.Router();
 
 // Apenas master e admin acessam /users
@@ -44,6 +45,9 @@ router.post('/', async (req, res) => {
         const hash = await bcrypt.hash(password, 10);
         db.prepare('INSERT INTO users (username, password_hash, email, role) VALUES (?, ?, ?, ?)')
             .run(username.trim(), hash, email?.trim() || null, targetRole);
+        const newUser = db.prepare('SELECT id, username, email, role FROM users WHERE username = ?').get(username.trim());
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        sendWelcomeEmail(newUser, baseUrl);
         res.redirect('/users?msg=Usuário criado com sucesso.');
     } catch (err) {
         if (err.message.includes('UNIQUE')) {
