@@ -58,20 +58,17 @@ router.get('/:id/editar', (req, res) => {
     const editUser = db.prepare('SELECT id, username, email, role, ativo FROM users WHERE id = ?').get(req.params.id);
     if (!editUser) return res.redirect('/users?err=Usuário não encontrado.');
 
-    // Admin não pode editar masters ou admins
-    if (req.user.role === 'admin' && editUser.role !== 'user') {
+    const isSelf = editUser.id === req.user.id;
+    // Admin só pode editar usuários comuns (ou a si mesmo)
+    if (req.user.role === 'admin' && !isSelf && editUser.role !== 'user') {
         return res.redirect('/users?err=Sem permissão para editar este usuário.');
-    }
-    // Nenhum usuário edita a si mesmo por aqui (evitar auto-bloqueio)
-    if (editUser.id === req.user.id) {
-        return res.redirect('/users?err=Use /perfil para editar seus próprios dados.');
     }
 
     const devices = db.prepare('SELECT id, name, device_uuid FROM devices ORDER BY name').all();
     const selectedDevices = db.prepare('SELECT device_id FROM user_devices WHERE user_id = ?')
         .all(req.params.id).map(r => r.device_id);
 
-    res.render('user-edit', { title: 'Editar Usuário', editUser, devices, selectedDevices, message: null, error: null });
+    res.render('user-edit', { title: 'Editar Usuário', editUser, devices, selectedDevices, isSelf, message: null, error: null });
 });
 
 // Salva edição
@@ -81,13 +78,15 @@ router.post('/:id', async (req, res) => {
 
     const editUser = db.prepare('SELECT id, role FROM users WHERE id = ?').get(targetId);
     if (!editUser) return res.redirect('/users?err=Usuário não encontrado.');
-    if (req.user.role === 'admin' && editUser.role !== 'user') {
+    const isSelf = targetId === req.user.id;
+    if (req.user.role === 'admin' && !isSelf && editUser.role !== 'user') {
         return res.redirect('/users?err=Sem permissão para editar este usuário.');
     }
 
-    // Define role final (admin não pode promover acima de 'user')
-    const targetRole = req.user.role === 'master' ? (role || editUser.role) : 'user';
-    const isAtivo = ativo === '1' ? 1 : 0;
+    // Auto-edição preserva role e ativo atuais (impede auto-bloqueio)
+    const targetRole = isSelf ? editUser.role
+        : req.user.role === 'master' ? (role || editUser.role) : 'user';
+    const isAtivo = isSelf ? 1 : (ativo === '1' ? 1 : 0);
 
     try {
         if (password && password.length >= 6) {

@@ -20,7 +20,7 @@
                 <label>E-mail</label>
                 <input type="email" name="email" value="<%= editUser.email || '' %>">
             </div>
-            <% if (user.role === 'master') { %>
+            <% if (user.role === 'master' && !isSelf) { %>
             <div>
                 <label>Perfil</label>
                 <select name="role">
@@ -30,6 +30,7 @@
                 </select>
             </div>
             <% } %>
+            <% if (!isSelf) { %>
             <div>
                 <label>Status</label>
                 <select name="ativo">
@@ -37,6 +38,7 @@
                     <option value="0" <%= !editUser.ativo ? 'selected' : '' %>>Inativo</option>
                 </select>
             </div>
+            <% } %>
         </div>
 
         <% if (editUser.role === 'user' || (user.role === 'master')) { %>
