@@ -18,11 +18,18 @@ async function main() {
     const envFile = path.join(__dirname, '.env');
     let secret = crypto.randomBytes(32).toString('hex');
 
-    // Preserva SESSION_SECRET se .env já existe
+    // Lê o .env existente e preserva todas as variáveis não gerenciadas pelo setup
+    const MANAGED_KEYS = new Set(['PORT', 'SESSION_SECRET', 'VIDEOS_PATH', 'DB_PATH', 'ADMIN_PASSWORD_HASH']);
+    const preservedVars = {};
     if (fs.existsSync(envFile)) {
-        const existing = fs.readFileSync(envFile, 'utf8');
-        const match = existing.match(/^SESSION_SECRET=(.+)$/m);
-        if (match) secret = match[1];
+        for (const line of fs.readFileSync(envFile, 'utf8').split('\n')) {
+            const eqIdx = line.indexOf('=');
+            if (eqIdx < 1) continue;
+            const key = line.slice(0, eqIdx).trim();
+            const val = line.slice(eqIdx + 1).trim();
+            if (key === 'SESSION_SECRET') { secret = val; continue; }
+            if (!MANAGED_KEYS.has(key) && key) preservedVars[key] = val;
+        }
     }
 
     console.log('\n=== PAI TV — Setup inicial ===\n');
@@ -39,15 +46,15 @@ async function main() {
 
     const hash = await bcrypt.hash(password, 10);
 
-    // Grava .env (sem ADMIN_PASSWORD_HASH — autenticação agora é pelo banco)
-    const envContent = [
+    // Grava .env preservando variáveis externas (Gmail, etc.)
+    const lines = [
         `PORT=3000`,
         `SESSION_SECRET=${secret}`,
         `VIDEOS_PATH=${videosPath}`,
         `DB_PATH=${dbPath}`,
-    ].join('\n') + '\n';
-
-    fs.writeFileSync(envFile, envContent);
+        ...Object.entries(preservedVars).map(([k, v]) => `${k}=${v}`),
+    ];
+    fs.writeFileSync(envFile, lines.join('\n') + '\n');
 
     // Inicializa banco e cria usuário master
     process.env.DB_PATH = dbPath;
