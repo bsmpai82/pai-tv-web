@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
     const isMaster = req.user.role === 'master';
     const users = isMaster
         ? db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users ORDER BY role, username`).all()
-        : db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users WHERE role = 'user' ORDER BY username`).all();
+        : db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users WHERE role = 'user' OR id = ? ORDER BY username`).all(req.user.id);
 
     res.render('users', { title: 'Usuários', users, message: req.query.msg || null, error: req.query.err || null });
 });
