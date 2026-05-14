@@ -12,10 +12,21 @@
     <a href="/">Dashboard</a>
     <a href="/videos">Vídeos</a>
     <a href="/playlists">Playlists</a>
+    <% if (user && user.role !== 'user') { %>
     <a href="/groups">Grupos</a>
+    <% } %>
     <a href="/devices">Dispositivos</a>
+    <% if (user && user.role !== 'user') { %>
     <a href="/logs">Logs</a>
     <a href="/settings">Configurações</a>
+    <% } %>
+    <% if (user && (user.role === 'master' || user.role === 'admin')) { %>
+    <a href="/users">Usuários</a>
+    <% } %>
+    <span class="nav-user">
+        <%= user ? user.username : '' %>
+        <% if (user) { %><span class="role-badge role-<%= user.role %>"><%= user.role %></span><% } %>
+    </span>
     <form action="/logout" method="POST" style="display:inline">
         <button type="submit" class="btn-link">Sair</button>
     </form>

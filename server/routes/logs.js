@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db/database');
+const requireRole = require('../middleware/requireRole');
 
 const router = express.Router();
 
@@ -22,10 +23,11 @@ router.get('/', (req, res) => {
         LIMIT ${limit}
     `).all(...params);
 
-    res.render('logs', { logs, tipo, nivel });
+    res.render('logs', { logs, tipo, nivel, message: req.query.msg || null, error: req.query.err || null });
 });
 
-router.post('/limpar', (req, res) => {
+// Limpar logs — apenas master
+router.post('/limpar', requireRole('master'), (req, res) => {
     db.prepare('DELETE FROM logs').run();
     res.redirect('/logs?msg=Logs+limpos.');
 });

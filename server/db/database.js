@@ -57,6 +57,22 @@ const migrations = [
         value      TEXT NOT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
+    `CREATE TABLE IF NOT EXISTS users (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        username      TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        email         TEXT,
+        role          TEXT NOT NULL DEFAULT 'user',
+        ativo         INTEGER NOT NULL DEFAULT 1,
+        created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS user_devices (
+        user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        device_id INTEGER NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+        PRIMARY KEY (user_id, device_id)
+    )`,
+    `ALTER TABLE videos ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL`,
+    `ALTER TABLE playlists ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

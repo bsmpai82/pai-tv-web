@@ -5,6 +5,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 const requireAuth = require('../middleware/requireAuth');
+const requireRole = require('../middleware/requireRole');
 const settingsStore = require('../services/settingsStore');
 const { log } = require('../services/logger');
 
@@ -35,7 +36,7 @@ function apkFilePath() {
 
 const router = express.Router();
 
-// Upload de novo APK (admin)
+// Upload de novo APK — master e admin
 const upload = multer({
     storage: multer.diskStorage({
         destination: (req, file, cb) => cb(null, path.resolve(RELEASES_PATH)),
@@ -48,7 +49,7 @@ const upload = multer({
     },
 });
 
-router.post('/upload', requireAuth, (req, res) => {
+router.post('/upload', requireAuth, requireRole('master', 'admin'), (req, res) => {
     upload.single('apk')(req, res, (err) => {
         if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
             return res.redirect('/settings?err=APK+muito+grande+%28máx+100+MB%29.');
@@ -64,8 +65,8 @@ router.post('/upload', requireAuth, (req, res) => {
     });
 });
 
-// Rotaciona o token — invalida URLs anteriores
-router.post('/rotate-token', requireAuth, (req, res) => {
+// Rotaciona o token — apenas master
+router.post('/rotate-token', requireAuth, requireRole('master'), (req, res) => {
     const novo = generateToken();
     settingsStore.set('apk_download_token', novo);
     log('apk', 'Token de download do APK rotacionado manualmente.', 'warn');
@@ -73,7 +74,6 @@ router.post('/rotate-token', requireAuth, (req, res) => {
 });
 
 // Download público protegido por token
-// GET /apk/:token
 router.get('/:token', (req, res) => {
     const token = settingsStore.get('apk_download_token');
     if (!token || req.params.token !== token) {

@@ -6,6 +6,7 @@ const fs = require('fs');
 
 const db = require('./db/database');
 const requireAuth = require('./middleware/requireAuth');
+const requireRole = require('./middleware/requireRole');
 const authRoutes = require('./routes/auth');
 const videoRoutes = require('./routes/videos');
 const playlistRoutes = require('./routes/playlists');
@@ -13,6 +14,7 @@ const deviceRoutes = require('./routes/devices');
 const groupRoutes = require('./routes/groups');
 const settingsRoutes = require('./routes/settings');
 const logsRoutes = require('./routes/logs');
+const usersRoutes = require('./routes/users');
 const apiRoutes = require('./routes/api');
 const { router: apkRoutes, ensureApkToken } = require('./routes/apk');
 const { startAlertChecker } = require('./services/alertChecker');
@@ -50,26 +52,41 @@ app.use('/', authRoutes);
 app.use('/videos', requireAuth, videoRoutes);
 app.use('/playlists', requireAuth, playlistRoutes);
 app.use('/devices', requireAuth, deviceRoutes);
-app.use('/groups', requireAuth, groupRoutes);
-app.use('/settings', requireAuth, settingsRoutes);
-app.use('/logs', requireAuth, logsRoutes);
+// Grupos, logs, configurações — apenas master e admin
+app.use('/groups', requireAuth, requireRole('master', 'admin'), groupRoutes);
+app.use('/settings', requireAuth, requireRole('master', 'admin'), settingsRoutes);
+app.use('/logs', requireAuth, requireRole('master', 'admin'), logsRoutes);
+// Gerenciamento de usuários — master e admin
+app.use('/users', requireAuth, usersRoutes);
 app.use('/api', apiRoutes);
 app.use('/apk', apkRoutes);
 
 app.get('/', requireAuth, (req, res) => {
-    const videoCount    = db.prepare('SELECT COUNT(*) AS n FROM videos').get().n;
-    const playlistCount = db.prepare('SELECT COUNT(*) AS n FROM playlists').get().n;
-    const deviceCount   = db.prepare('SELECT COUNT(*) AS n FROM devices').get().n;
-    const groupCount    = db.prepare('SELECT COUNT(*) AS n FROM groups').get().n;
-    const pendingCount  = db.prepare('SELECT COUNT(*) AS n FROM devices WHERE name IS NULL').get().n;
+    const isUser = req.user.role === 'user';
+
+    const videoCount    = isUser
+        ? db.prepare('SELECT COUNT(*) AS n FROM videos WHERE owner_id = ?').get(req.user.id).n
+        : db.prepare('SELECT COUNT(*) AS n FROM videos').get().n;
+    const playlistCount = isUser
+        ? db.prepare('SELECT COUNT(*) AS n FROM playlists WHERE owner_id = ?').get(req.user.id).n
+        : db.prepare('SELECT COUNT(*) AS n FROM playlists').get().n;
+    const deviceCount   = isUser
+        ? db.prepare('SELECT COUNT(*) AS n FROM user_devices WHERE user_id = ?').get(req.user.id).n
+        : db.prepare('SELECT COUNT(*) AS n FROM devices').get().n;
+    const groupCount    = isUser ? 0 : db.prepare('SELECT COUNT(*) AS n FROM groups').get().n;
+    const pendingCount  = isUser ? 0 : db.prepare('SELECT COUNT(*) AS n FROM devices WHERE name IS NULL').get().n;
 
     // Lista de dispositivos com status online/offline
-    const devices = db.prepare(`
-        SELECT d.name, d.last_seen
-        FROM devices d
-        WHERE d.name IS NOT NULL
-        ORDER BY d.name ASC
-    `).all();
+    const devicesQuery = isUser
+        ? `SELECT d.name, d.last_seen FROM devices d
+           JOIN user_devices ud ON ud.device_id = d.id AND ud.user_id = ?
+           WHERE d.name IS NOT NULL ORDER BY d.name ASC`
+        : `SELECT d.name, d.last_seen FROM devices d WHERE d.name IS NOT NULL ORDER BY d.name ASC`;
+
+    const devices = isUser
+        ? db.prepare(devicesQuery).all(req.user.id)
+        : db.prepare(devicesQuery).all();
+
     const now = Date.now();
     devices.forEach(d => {
         d.is_online = d.last_seen
@@ -77,8 +94,7 @@ app.get('/', requireAuth, (req, res) => {
             : false;
     });
 
-    // Dispositivos configurados offline há mais de 1 hora
-    const offlineDevices = db.prepare(`
+    const offlineDevices = isUser ? [] : db.prepare(`
         SELECT name FROM devices
         WHERE name IS NOT NULL
           AND (

@@ -1,0 +1,71 @@
+<%- include('partials/header', { title: title }) %>
+
+<h1><%= title %></h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="box">
+    <form action="/users/<%= editUser.id %>" method="POST">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+            <div>
+                <label>Usuário</label>
+                <input type="text" name="username" value="<%= editUser.username %>" required>
+            </div>
+            <div>
+                <label>Nova senha (deixe em branco para manter)</label>
+                <input type="password" name="password" placeholder="mínimo 6 caracteres" autocomplete="new-password">
+            </div>
+            <div>
+                <label>E-mail</label>
+                <input type="email" name="email" value="<%= editUser.email || '' %>">
+            </div>
+            <% if (user.role === 'master') { %>
+            <div>
+                <label>Perfil</label>
+                <select name="role">
+                    <option value="user"   <%= editUser.role === 'user'   ? 'selected' : '' %>>Usuário comum</option>
+                    <option value="admin"  <%= editUser.role === 'admin'  ? 'selected' : '' %>>Admin</option>
+                    <option value="master" <%= editUser.role === 'master' ? 'selected' : '' %>>Master</option>
+                </select>
+            </div>
+            <% } %>
+            <div>
+                <label>Status</label>
+                <select name="ativo">
+                    <option value="1" <%= editUser.ativo ? 'selected' : '' %>>Ativo</option>
+                    <option value="0" <%= !editUser.ativo ? 'selected' : '' %>>Inativo</option>
+                </select>
+            </div>
+        </div>
+
+        <% if (editUser.role === 'user' || (user.role === 'master')) { %>
+        <div style="margin-bottom:16px">
+            <label><strong>Dispositivos permitidos</strong> (apenas para usuário comum)</label>
+            <p style="color:#888;font-size:0.9em;margin:4px 0 8px">
+                Selecione quais dispositivos este usuário pode visualizar no painel.
+            </p>
+            <% if (devices.length === 0) { %>
+                <p style="color:#888">Nenhum dispositivo cadastrado.</p>
+            <% } else { %>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <% devices.forEach(d => { %>
+                <label style="display:flex;align-items:center;gap:4px;background:#f5f5f5;padding:6px 10px;border-radius:4px">
+                    <input type="checkbox" name="devices" value="<%= d.id %>"
+                           <%= selectedDevices.includes(d.id) ? 'checked' : '' %>>
+                    <%= d.name || d.device_uuid.slice(0,8) + '...' %>
+                </label>
+                <% }) %>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+
+        <div style="display:flex;gap:8px">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="/users" class="btn">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<%- include('partials/footer') %>

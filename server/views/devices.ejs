@@ -5,6 +5,7 @@
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
+<% if (user && user.role !== 'user') { %>
 <div style="margin-bottom:20px">
     <form action="/devices/sync-all" method="POST" style="display:inline">
         <button type="submit" class="btn btn-primary"
@@ -13,6 +14,7 @@
         </button>
     </form>
 </div>
+<% } %>
 
 <div class="box">
     <h2>Dispositivos registrados (<%= devices.length %>)</h2>
@@ -85,6 +87,7 @@
                     <% } %>
                 </td>
                 <td>
+                    <% if (user && user.role !== 'user') { %>
                     <div style="display:flex;gap:6px;flex-wrap:wrap">
 
                         <%# Nomear %>
@@ -136,6 +139,9 @@
                         </form>
 
                     </div>
+                    <% } else { %>
+                    <span style="color:#888;font-size:12px">somente leitura</span>
+                    <% } %>
                 </td>
             </tr>
         <% }) %>

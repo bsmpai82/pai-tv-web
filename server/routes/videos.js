@@ -65,19 +65,30 @@ const upload = multer({
     },
 });
 
-// Listagem
+// Listagem — usuário comum vê apenas seus próprios vídeos
 router.get('/', (req, res) => {
-    const videos = db.prepare(`
-        SELECT v.*, COUNT(pv.playlist_id) AS playlist_count
-        FROM videos v
-        LEFT JOIN playlist_videos pv ON pv.video_id = v.id
-        GROUP BY v.id
-        ORDER BY v.created_at DESC
-    `).all();
+    const isUser = req.user.role === 'user';
+    const query = isUser
+        ? `SELECT v.*, COUNT(pv.playlist_id) AS playlist_count
+           FROM videos v
+           LEFT JOIN playlist_videos pv ON pv.video_id = v.id
+           WHERE v.owner_id = ?
+           GROUP BY v.id
+           ORDER BY v.created_at DESC`
+        : `SELECT v.*, COUNT(pv.playlist_id) AS playlist_count
+           FROM videos v
+           LEFT JOIN playlist_videos pv ON pv.video_id = v.id
+           GROUP BY v.id
+           ORDER BY v.created_at DESC`;
+
+    const videos = isUser
+        ? db.prepare(query).all(req.user.id)
+        : db.prepare(query).all();
+
     res.render('videos', { videos, message: req.query.msg || null, error: req.query.err || null });
 });
 
-// Upload
+// Upload — registra o dono do vídeo
 router.post('/upload', (req, res) => {
     upload.single('video')(req, res, async (err) => {
         if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
@@ -107,19 +118,23 @@ router.post('/upload', (req, res) => {
         await generateThumb(videoPath, thumbPath);
 
         db.prepare(`
-            INSERT INTO videos (filename, original_name, size, thumb)
-            VALUES (?, ?, ?, ?)
-        `).run(req.file.filename, originalName, req.file.size, thumbName);
+            INSERT INTO videos (filename, original_name, size, thumb, owner_id)
+            VALUES (?, ?, ?, ?, ?)
+        `).run(req.file.filename, originalName, req.file.size, thumbName, req.user.id);
 
         log('video', `Vídeo enviado: ${originalName} (${(req.file.size / 1024 / 1024).toFixed(1)} MB)`);
         res.redirect('/videos?msg=Vídeo+enviado+com+sucesso.');
     });
 });
 
-// Remoção
+// Remoção — usuário comum só pode deletar os próprios vídeos
 router.post('/:id/delete', (req, res) => {
     const video = db.prepare('SELECT * FROM videos WHERE id = ?').get(req.params.id);
     if (!video) return res.redirect('/videos?err=Vídeo+não+encontrado.');
+
+    if (req.user.role === 'user' && video.owner_id !== req.user.id) {
+        return res.redirect('/videos?err=Sem+permissão+para+remover+este+vídeo.');
+    }
 
     const filePath = path.resolve(process.env.VIDEOS_PATH || './uploads', video.filename);
     try { fs.unlinkSync(filePath); } catch (e) { console.warn('Aviso: não foi possível remover arquivo:', filePath, e.message); }

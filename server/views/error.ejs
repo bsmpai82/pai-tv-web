@@ -1,0 +1,9 @@
+<%- include('partials/header', { title: title || 'Erro' }) %>
+
+<div class="box" style="text-align:center;padding:48px">
+    <h1 style="color:#c0392b"><%= title || 'Erro' %></h1>
+    <p style="color:#555;margin:16px 0"><%= message || 'Ocorreu um erro inesperado.' %></p>
+    <a href="/" class="btn btn-primary">Voltar ao início</a>
+</div>
+
+<%- include('partials/footer') %>

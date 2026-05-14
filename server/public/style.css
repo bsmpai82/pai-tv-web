@@ -20,7 +20,7 @@ nav {
 nav .brand { font-weight: 700; font-size: 18px; margin-right: 8px; color: #e94560; }
 nav a { color: #ccc; text-decoration: none; font-size: 14px; }
 nav a:hover { color: #fff; }
-nav form { margin-left: auto; }
+nav form { margin-left: 0; }
 .btn-link {
     background: none; border: none; color: #ccc; cursor: pointer;
     font-size: 14px; padding: 0;
@@ -112,4 +112,19 @@ tr:hover td { background: #fafafa; }
 .box {
     background: #fff; border-radius: 8px; padding: 24px;
     margin-bottom: 28px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+/* ROLE BADGES */
+.role-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+}
+.role-master { background: #e94560; color: #fff; }
+.role-admin  { background: #1a1a2e; color: #fff; }
+.role-user   { background: #e0e4ea; color: #444; }
+
+/* USER INFO IN NAV */
+.nav-user {
+    margin-left: auto; color: #ccc; font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
 }

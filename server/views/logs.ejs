@@ -2,6 +2,9 @@
 
 <h1>Logs do sistema</h1>
 
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
 <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
     <form method="GET" action="/logs" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <select name="tipo" onchange="this.form.submit()"
@@ -20,10 +23,12 @@
         </select>
     </form>
 
+    <% if (user && user.role === 'master') { %>
     <form action="/logs/limpar" method="POST" style="margin-left:auto"
           onsubmit="return confirm('Limpar todos os logs?')">
         <button type="submit" class="btn btn-danger btn-sm">Limpar logs</button>
     </form>
+    <% } %>
 </div>
 
 <div class="box" style="padding:0;overflow-x:auto">

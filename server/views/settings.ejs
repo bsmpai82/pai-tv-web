@@ -47,10 +47,12 @@
                    style="font-size:13px">
             <button type="submit" class="btn btn-primary">Enviar novo APK</button>
         </form>
+        <% if (user && user.role === 'master') { %>
         <form action="/apk/rotate-token" method="POST"
               onsubmit="return confirm('Rotacionar o token invalida todos os links de download anteriores. Continuar?')">
             <button type="submit" class="btn btn-danger">Rotacionar token</button>
         </form>
+        <% } %>
     </div>
 
     <details style="font-size:13px;color:#555">

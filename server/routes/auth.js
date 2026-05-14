@@ -1,27 +1,32 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const db = require('../db/database');
 const router = express.Router();
 
 router.get('/login', (req, res) => {
-    if (req.session.authenticated) return res.redirect('/');
+    if (req.session.userId) return res.redirect('/');
     res.render('login', { error: null });
 });
 
 router.post('/login', async (req, res) => {
-    const { password } = req.body;
-    const hash = process.env.ADMIN_PASSWORD_HASH;
+    const { username, password } = req.body;
 
-    if (!hash) {
-        return res.render('login', { error: 'Servidor não configurado. Execute: npm run setup' });
+    if (!username || !password) {
+        return res.render('login', { error: 'Usuário e senha são obrigatórios.' });
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE username = ? AND ativo = 1').get(username.trim());
+    if (!user) {
+        return res.render('login', { error: 'Usuário ou senha incorretos.' });
     }
 
     try {
-        const match = await bcrypt.compare(password, hash);
+        const match = await bcrypt.compare(password, user.password_hash);
         if (match) {
-            req.session.authenticated = true;
+            req.session.userId = user.id;
             return res.redirect('/');
         }
-        res.render('login', { error: 'Senha incorreta.' });
+        res.render('login', { error: 'Usuário ou senha incorretos.' });
     } catch {
         res.render('login', { error: 'Erro de autenticação.' });
     }

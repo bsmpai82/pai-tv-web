@@ -1,0 +1,79 @@
+<%- include('partials/header', { title: 'Usuários' }) %>
+
+<h1>Usuários</h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="box" style="margin-bottom:24px">
+    <h2>Novo usuário</h2>
+    <form action="/users" method="POST" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div>
+            <label>Usuário</label>
+            <input type="text" name="username" required placeholder="nome de login">
+        </div>
+        <div>
+            <label>Senha</label>
+            <input type="password" name="password" required placeholder="mínimo 6 caracteres">
+        </div>
+        <div>
+            <label>E-mail (opcional)</label>
+            <input type="email" name="email" placeholder="usuario@exemplo.com">
+        </div>
+        <% if (user.role === 'master') { %>
+        <div>
+            <label>Perfil</label>
+            <select name="role">
+                <option value="user">Usuário comum</option>
+                <option value="admin">Admin</option>
+                <option value="master">Master</option>
+            </select>
+        </div>
+        <% } %>
+        <button type="submit" class="btn btn-primary">Criar</button>
+    </form>
+</div>
+
+<div class="box">
+    <h2>Usuários cadastrados (<%= users.length %>)</h2>
+    <% if (users.length === 0) { %>
+        <p style="color:#888">Nenhum usuário cadastrado.</p>
+    <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th>E-mail</th>
+                <th>Perfil</th>
+                <th>Status</th>
+                <th>Criado em</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        <% users.forEach(u => { %>
+            <tr>
+                <td><strong><%= u.username %></strong></td>
+                <td><%= u.email || '—' %></td>
+                <td><span class="role-badge role-<%= u.role %>"><%= u.role %></span></td>
+                <td><%= u.ativo ? 'Ativo' : 'Inativo' %></td>
+                <td><%= u.created_at ? u.created_at.slice(0,10) : '—' %></td>
+                <td>
+                    <% if (u.id !== user.id) { %>
+                    <a href="/users/<%= u.id %>/editar" class="btn btn-sm">Editar</a>
+                    <form action="/users/<%= u.id %>/deletar" method="POST" style="display:inline"
+                          onsubmit="return confirm('Deletar usuário <%= u.username %>?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Deletar</button>
+                    </form>
+                    <% } else { %>
+                    <em style="color:#888">você</em>
+                    <% } %>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
