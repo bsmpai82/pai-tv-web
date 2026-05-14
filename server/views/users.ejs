@@ -59,14 +59,12 @@
                 <td><%= u.ativo ? 'Ativo' : 'Inativo' %></td>
                 <td><%= u.created_at ? u.created_at.slice(0,10) : '—' %></td>
                 <td>
-                    <% if (u.id !== user.id) { %>
                     <a href="/users/<%= u.id %>/editar" class="btn btn-sm">Editar</a>
+                    <% if (u.id !== user.id) { %>
                     <form action="/users/<%= u.id %>/deletar" method="POST" style="display:inline"
                           onsubmit="return confirm('Deletar usuário <%= u.username %>?')">
                         <button type="submit" class="btn btn-sm btn-danger">Deletar</button>
                     </form>
-                    <% } else { %>
-                    <em style="color:#888">você</em>
                     <% } %>
                 </td>
             </tr>
