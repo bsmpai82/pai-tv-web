@@ -10,7 +10,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
-import java.net.InetAddress
 
 class SyncService : Service() {
 
@@ -18,6 +17,7 @@ class SyncService : Service() {
         const val CHANNEL_ID = "pai_tv_sync"
         const val NOTIFICATION_ID = 1
         const val CHECK_INTERVAL_MS = 5 * 60 * 1000L // 5 minutos
+        const val WATCHDOG_INTERVAL_MS = 60 * 1000L  // 1 minuto
         const val ACTION_PLAYLIST_UPDATED = "com.paitv.PLAYLIST_UPDATED"
         const val EXTRA_LAUNCH_UI = "launch_ui"
         // Atraso para dar tempo do sistema terminar o boot antes de lançar
@@ -58,11 +58,19 @@ class SyncService : Service() {
             }
             api.token = token
 
-            // Loop de verificação a cada 5 minutos
+            // Loop de sincronização a cada 5 minutos
             while (isActive) {
                 runCatching { checkAndSync() }
                     .onFailure { Log.e("SyncService", "Erro no sync: ${it.message}") }
                 delay(CHECK_INTERVAL_MS)
+            }
+        }
+
+        // Loop do watchdog independente — verifica a cada 1 minuto
+        scope.launch {
+            while (isActive) {
+                delay(WATCHDOG_INTERVAL_MS)
+                watchdogCheck()
             }
         }
 
@@ -104,6 +112,13 @@ class SyncService : Service() {
                 putStringArrayListExtra("filenames", ArrayList(cachedFilenames))
             })
             Log.i("SyncService", "Sync concluído. ${cachedFilenames.size}/${videos.size} vídeo(s) em cache.")
+        }
+    }
+
+    private fun watchdogCheck() {
+        if (!MainActivity.isInForeground) {
+            Log.w("SyncService", "Watchdog: MainActivity não está em foreground — relançando")
+            launchMainActivity()
         }
     }
 

@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "PaiTV"
+        @Volatile var isInForeground = false
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        isInForeground = true
         registerReceiver(
             playlistReceiver,
             IntentFilter(SyncService.ACTION_PLAYLIST_UPDATED),
@@ -72,6 +74,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        isInForeground = false
         unregisterReceiver(playlistReceiver)
         player?.pause()
     }

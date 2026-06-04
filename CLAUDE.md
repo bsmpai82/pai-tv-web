@@ -187,7 +187,8 @@ pm2 restart all              # Reinicia o servidor
 
 ### Pendente
 - [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
-- [ ] Testar com Fire TV Stick Amazon
+- [x] Watchdog no app: relança MainActivity se sair do foreground (intervalo: 1 min, `SyncService.kt`)
+- [x] Autostart validado no Fire TV Stick via `cmd package set-home-activity` — ver seção "Provisionar novo stick"
 
 ### Gmail configurado no VPS
 - **Conta:** paitv000001@gmail.com
@@ -248,11 +249,16 @@ adb install $APK
 
 ## Provisionar novo stick (modo kiosk com autostart)
 
-Runbook validado no **IZY Play Intelbras** em 2026-04-18. O objetivo é que o stick abra o PAI TV sozinho a cada boot, sem intervenção humana.
+Runbook validado no **IZY Play Intelbras** (2026-04-18) e **Fire TV Stick Amazon** (2026-06-04).
 
-### Estratégia
+### Estratégia por dispositivo
 
-O app é declarado como launcher (`HOME` + `DEFAULT` no [AndroidManifest.xml](android/app/src/main/AndroidManifest.xml)). Para o sistema abri-lo automaticamente no boot, ele precisa ser o **único** HOME disponível — por isso desabilitamos o launcher do fabricante via ADB. É reversível.
+| Dispositivo | Método de kiosk | Launcher a tratar |
+| --- | --- | --- |
+| Intelbras IZY Play | `pm disable-user` (desabilita launcher) | `com.google.android.tvlauncher` |
+| Fire TV Stick | `cmd package set-home-activity` (define HOME) | `com.amazon.tv.launcher` (protegido, não pode desabilitar) |
+
+Em ambos o app abre automaticamente no boot. No Fire TV o launcher Amazon permanece em background — se o usuário sair, o **watchdog** (SyncService) relança o PAI TV em até 1 minuto.
 
 ### Passo a passo (por stick)
 
@@ -261,7 +267,7 @@ Preparação no stick (uma vez):
 - **Configurações → Preferências do dispositivo → Opções do desenvolvedor** → **Depuração ADB: ON** e **Depuração por rede: ON**
 - Anotar o IP: **Configurações → Rede e Internet → [sua Wi-Fi]**
 
-### Windows (casa)
+### Windows (casa) — Intelbras IZY Play
 
 ```powershell
 $ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
@@ -276,7 +282,21 @@ $IP  = "192.168.31.129"  # trocar pelo IP do stick
 & $ADB reboot
 ```
 
-### Linux (trabalho)
+### Windows (casa) — Fire TV Stick
+
+```powershell
+$ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
+$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+$IP  = "192.168.31.161"  # trocar pelo IP do stick
+
+& $ADB connect "${IP}:5555"
+& $ADB uninstall com.paitv
+& $ADB install $APK
+& $ADB shell cmd package set-home-activity com.paitv/.MainActivity
+& $ADB reboot
+```
+
+### Linux (trabalho) — Intelbras IZY Play
 
 ```bash
 IP="192.168.10.194"   # trocar pelo IP do stick
@@ -290,9 +310,22 @@ adb shell pm disable-user --user 0 com.google.android.tvlauncher
 adb reboot
 ```
 
+### Linux (trabalho) — Fire TV Stick
+
+```bash
+IP="192.168.31.161"   # trocar pelo IP do stick
+APK=~/pai-tv-web/android/app/build/outputs/apk/debug/app-debug.apk
+
+adb connect ${IP}:5555
+adb uninstall com.paitv
+adb install $APK
+adb shell cmd package set-home-activity com.paitv/.MainActivity
+adb reboot
+```
+
 ### Conferir qual launcher o dispositivo está usando
 
-Se o stick vier com launcher diferente, descubra o pacote antes de desabilitar:
+Se o stick vier com launcher diferente, descubra o pacote antes:
 
 ```bash
 # Linux
@@ -304,16 +337,25 @@ adb shell 'cmd package query-activities -c android.intent.category.HOME -a andro
 & $ADB shell 'cmd package query-activities -c android.intent.category.HOME -a android.intent.action.MAIN' | Select-String "packageName="
 ```
 
-Pacotes comuns a desabilitar:
+Pacotes comuns:
 - Google/Android TV (Intelbras IZY Play, Mi Box, TCL): `com.google.android.tvlauncher`
-- Fire TV Stick: `com.amazon.tv.launcher`
+- Fire TV Stick: `com.amazon.tv.launcher` (protegido — usar `set-home-activity`, não `pm disable-user`)
 - Some TVs: `com.android.tv.launcher`
 
 ### Reverter (se precisar devolver o stick ao uso normal)
 
+**Intelbras:**
+
 ```powershell
 & $ADB shell pm enable com.google.android.tvlauncher
 & $ADB shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
+```
+
+**Fire TV Stick:**
+
+```powershell
+& $ADB shell cmd package set-home-activity com.amazon.tv.launcher
+& $ADB reboot
 ```
 
 ### Troubleshooting — caminhos que NÃO funcionam
@@ -322,15 +364,15 @@ Já testados e descartados. **Não tente novamente**:
 
 1. **`android:priority="1000"` no `<intent-filter>` de activity HOME** — o Android normaliza para 0 em apps não-system (proteção anti-hijack). O Google TV Launcher tem `priority=2` (privapp) e sempre vence. O atributo só funciona em `<receiver>` (por isso o BootReceiver o usa).
 
-2. **`cmd package set-home-activity com.paitv/.MainActivity`** — responde "Success" mas **não persiste no reboot** quando existe outro launcher com priority maior.
+2. **`pm disable-user` no Fire TV Stick** — retorna `SecurityException: Cannot disable a protected package: com.amazon.tv.launcher`. Usar `set-home-activity` em vez disso.
 
 3. **Fallback via `BootReceiver` escutando `BOOT_COMPLETED`** — após `adb install`, o app fica em "stopped state" e o Android 10+ **não entrega broadcasts implícitos** (inclusive `BOOT_COMPLETED`) até ele ser iniciado manualmente uma vez. Mesmo depois de iniciar, o Intelbras entrega o broadcast para outros receivers mas não pro nosso — comportamento inconsistente por OEM.
 
-O único método 100% confiável em Android TV / Google TV é desabilitar o launcher concorrente. O código do BootReceiver continua no projeto como "cinto de segurança" caso o launcher seja reabilitado acidentalmente.
+O código do BootReceiver continua no projeto como "cinto de segurança". O **watchdog** no SyncService complementa: verifica a cada 1 minuto se a MainActivity está em foreground e a relança se necessário.
 
-### Dica para provisionar os 10 sticks restantes em lote
+### Dica para provisionar os sticks em lote
 
-Coloque o bloco do passo a passo num `.ps1` parametrizado por IP e nome do dispositivo. Depois execute para cada stick — em ~2 minutos por unidade.
+Coloque o bloco do passo a passo num `.ps1` parametrizado por IP e modelo. Depois execute para cada stick — em ~2 minutos por unidade.
 
 ---
 
