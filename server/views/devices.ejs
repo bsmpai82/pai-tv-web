@@ -140,7 +140,51 @@
 
                     </div>
                     <% } else { %>
-                    <span style="color:#888;font-size:12px">somente leitura</span>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+
+                        <%# Nomear %>
+                        <form action="/devices/<%= d.id %>/name" method="POST"
+                              style="display:flex;gap:4px">
+                            <input type="text" name="name" value="<%= d.name || '' %>"
+                                   placeholder="Nome da TV" style="width:120px;padding:4px 8px;font-size:12px;border:1px solid #ddd;border-radius:4px">
+                            <button type="submit" class="btn btn-primary btn-sm">OK</button>
+                        </form>
+
+                        <%# Atribuir playlist %>
+                        <form action="/devices/<%= d.id %>/playlist" method="POST"
+                              style="display:flex;gap:4px">
+                            <select name="playlist_id" style="padding:4px 8px;font-size:12px;border:1px solid #ddd;border-radius:4px">
+                                <option value="">Sem playlist</option>
+                                <% playlists.forEach(p => { %>
+                                    <option value="<%= p.id %>"
+                                        <%= d.playlist_id === p.id ? 'selected' : '' %>>
+                                        <%= p.name %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Atribuir</button>
+                        </form>
+
+                        <%# Atribuir grupo %>
+                        <form action="/devices/<%= d.id %>/group" method="POST"
+                              style="display:flex;gap:4px">
+                            <select name="group_id" style="padding:4px 8px;font-size:12px;border:1px solid #ddd;border-radius:4px">
+                                <option value="">Sem grupo</option>
+                                <% groups.forEach(g => { %>
+                                    <option value="<%= g.id %>" <%= d.group_id === g.id ? 'selected' : '' %>>
+                                        <%= g.name %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Grupo</button>
+                        </form>
+
+                        <%# Sync individual %>
+                        <form action="/devices/<%= d.id %>/sync" method="POST">
+                            <button type="submit" class="btn btn-primary btn-sm">Sync</button>
+                        </form>
+
+                    </div>
                     <% } %>
                 </td>
             </tr>

@@ -6,6 +6,15 @@ const router = express.Router();
 
 const onlyElevated = requireRole('master', 'admin');
 
+function canManageDevice(req, res, next) {
+    if (req.user.role !== 'user') return next();
+    const row = db.prepare(
+        'SELECT 1 FROM user_devices WHERE user_id = ? AND device_id = ?'
+    ).get(req.user.id, req.params.id);
+    if (!row) return res.status(403).send('Sem permissão');
+    next();
+}
+
 function markOnline(devices) {
     const now = Date.now();
     devices.forEach(d => {
@@ -42,7 +51,9 @@ router.get('/', (req, res) => {
 
     markOnline(devices);
 
-    const playlists = db.prepare('SELECT * FROM playlists ORDER BY name').all();
+    const playlists = isUser
+        ? db.prepare('SELECT * FROM playlists WHERE owner_id = ? ORDER BY name').all(req.user.id)
+        : db.prepare('SELECT * FROM playlists ORDER BY name').all();
     const groups    = db.prepare('SELECT * FROM groups ORDER BY name').all();
     res.render('devices', {
         devices, playlists, groups,
@@ -50,21 +61,20 @@ router.get('/', (req, res) => {
     });
 });
 
-// Todas as rotas de gestão abaixo são restritas a master e admin
-router.post('/:id/name', onlyElevated, (req, res) => {
+router.post('/:id/name', canManageDevice, (req, res) => {
     const name = (req.body.name || '').trim();
     if (!name) return res.redirect('/devices?err=Nome+obrigatório.');
     db.prepare('UPDATE devices SET name = ? WHERE id = ?').run(name, req.params.id);
     res.redirect('/devices?msg=Dispositivo+nomeado.');
 });
 
-router.post('/:id/playlist', onlyElevated, (req, res) => {
+router.post('/:id/playlist', canManageDevice, (req, res) => {
     const playlist_id = req.body.playlist_id || null;
     db.prepare('UPDATE devices SET playlist_id = ?, force_sync = 1 WHERE id = ?').run(playlist_id, req.params.id);
     res.redirect('/devices?msg=Playlist+atribuída.');
 });
 
-router.post('/:id/sync', onlyElevated, (req, res) => {
+router.post('/:id/sync', canManageDevice, (req, res) => {
     db.prepare('UPDATE devices SET force_sync = 1 WHERE id = ?').run(req.params.id);
     res.redirect('/devices?msg=Sync+solicitado+para+o+dispositivo.');
 });
@@ -74,7 +84,7 @@ router.post('/sync-all', onlyElevated, (req, res) => {
     res.redirect('/devices?msg=Sync+solicitado+para+todos+os+dispositivos.');
 });
 
-router.post('/:id/group', onlyElevated, (req, res) => {
+router.post('/:id/group', canManageDevice, (req, res) => {
     const group_id = req.body.group_id || null;
     db.prepare('UPDATE devices SET group_id = ?, force_sync = 1 WHERE id = ?').run(group_id, req.params.id);
     res.redirect('/devices?msg=Grupo+atribuído.');
