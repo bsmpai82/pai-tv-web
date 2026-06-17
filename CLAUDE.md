@@ -211,19 +211,22 @@ pm2 restart all              # Reinicia o servidor
 
 ## Build do APK Android
 
+O app tem dois flavors: `prod` (paitv.com.br) e `homolog` (homolog.paitv.com.br).
+Os dois podem coexistir no mesmo stick pois têm applicationId diferente.
+
 ### Windows (casa)
 ```powershell
 cd D:\DEV\pai-tv-web\android
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-.\gradlew.bat assembleDebug
-# APK gerado em: app\build\outputs\apk\debug\app-debug.apk
+.\gradlew.bat assembleProdDebug      # produção  → app\build\outputs\apk\prod\debug\
+.\gradlew.bat assembleHomologDebug   # homolog   → app\build\outputs\apk\homolog\debug\
 ```
 
 ### Linux (trabalho)
 ```bash
 cd ~/pai-tv-web/android
-./gradlew assembleDebug
-# APK gerado em: app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleProdDebug
+./gradlew assembleHomologDebug
 ```
 
 ## Instalar APK no stick via ADB

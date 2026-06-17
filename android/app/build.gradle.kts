@@ -13,13 +13,26 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
-        buildConfigField("String", "SERVER_URL", "\"https://paitv.com.br\"")
     }
 
     buildFeatures {
         viewBinding = true
         buildConfig = true
+    }
+
+    flavorDimensions += "env"
+    productFlavors {
+        create("prod") {
+            dimension = "env"
+            buildConfigField("String", "SERVER_URL", "\"https://paitv.com.br\"")
+        }
+        create("homolog") {
+            dimension = "env"
+            applicationIdSuffix = ".homolog"
+            versionNameSuffix = "-homolog"
+            buildConfigField("String", "SERVER_URL", "\"https://homolog.paitv.com.br\"")
+            resValue("string", "app_name", "PAI TV HML")
+        }
     }
 
     buildTypes {

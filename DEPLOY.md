@@ -187,6 +187,59 @@ Após iniciar o app em cada Fire Stick:
 /srv/pai_tv/pai_tv.db   → banco de dados SQLite
 ```
 
+## Ambientes: Produção × Homologação
+
+| Item          | Produção                 | Homologação                   |
+| ------------- | ------------------------ | ----------------------------- |
+| Domínio       | paitv.com.br             | homolog.paitv.com.br          |
+| Porta Node.js | 3000                     | 3001                          |
+| Pasta no VPS  | /root/pai-tv-web         | /root/pai-tv-web-homolog      |
+| Branch git    | main                     | develop                       |
+| Nome PM2      | pai-tv                   | pai-tv-homolog                |
+| Banco SQLite  | pai_tv.db                | pai_tv_homolog.db             |
+| Dados/thumbs  | /srv/pai_tv/             | /srv/pai_tv_homolog/          |
+| APK flavor    | prod (`com.paitv`)       | homolog (`com.paitv.homolog`) |
+
+### Fluxo de trabalho com homolog
+
+```
+feature branch → develop → push → deploy homolog → validado → merge main → deploy prod
+```
+
+### Deploy da homologação no VPS
+
+```bash
+ssh root@72.60.249.207
+bash /root/pai-tv-web-homolog/deploy/setup-homolog.sh
+# Depois, criar usuário master:
+cd /root/pai-tv-web-homolog/server && node setup.js
+```
+
+O script `deploy/setup-homolog.sh` é idempotente — pode ser re-executado para atualizar a homolog após novos commits no branch `develop`.
+
+### Build do APK por ambiente
+
+```powershell
+# Windows
+cd D:\DEV\pai-tv-web\android
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+.\gradlew.bat assembleProdDebug      # produção  → app/build/outputs/apk/prod/debug/
+.\gradlew.bat assembleHomologDebug   # homolog   → app/build/outputs/apk/homolog/debug/
+```
+
+```bash
+# Linux
+cd ~/pai-tv-web/android
+./gradlew assembleProdDebug
+./gradlew assembleHomologDebug
+```
+
+### Pré-requisito manual (uma vez)
+
+No painel do **Registro.br**: adicionar registro A `homolog` → `72.60.249.207`.
+
+---
+
 ## Backup recomendado
 
 ```bash
