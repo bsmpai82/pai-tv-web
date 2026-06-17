@@ -12,25 +12,31 @@ function ask(question) {
 
 async function main() {
     const isProduction = process.env.NODE_ENV === 'production';
-    const videosPath = isProduction ? '/srv/pai_tv/videos' : './uploads';
-    const dbPath = isProduction ? '/srv/pai_tv/pai_tv.db' : './db/pai_tv.db';
 
     const envFile = path.join(__dirname, '.env');
     let secret = crypto.randomBytes(32).toString('hex');
 
-    // Lê o .env existente e preserva todas as variáveis não gerenciadas pelo setup
-    const MANAGED_KEYS = new Set(['PORT', 'SESSION_SECRET', 'VIDEOS_PATH', 'DB_PATH', 'ADMIN_PASSWORD_HASH']);
+    // Lê o .env existente: preserva variáveis não gerenciadas e usa valores existentes como defaults
+    const MANAGED_KEYS = new Set(['SESSION_SECRET', 'ADMIN_PASSWORD_HASH']);
     const preservedVars = {};
+    const existingEnv = {};
     if (fs.existsSync(envFile)) {
         for (const line of fs.readFileSync(envFile, 'utf8').split('\n')) {
             const eqIdx = line.indexOf('=');
             if (eqIdx < 1) continue;
             const key = line.slice(0, eqIdx).trim();
             const val = line.slice(eqIdx + 1).trim();
+            if (!key) continue;
+            existingEnv[key] = val;
             if (key === 'SESSION_SECRET') { secret = val; continue; }
-            if (!MANAGED_KEYS.has(key) && key) preservedVars[key] = val;
+            if (!MANAGED_KEYS.has(key)) preservedVars[key] = val;
         }
     }
+
+    // Usa valores do .env existente como defaults (permite homolog ter PORT=3001, DB_PATH próprio, etc.)
+    const port = existingEnv['PORT'] || '3000';
+    const videosPath = existingEnv['VIDEOS_PATH'] || (isProduction ? '/srv/pai_tv/videos' : './uploads');
+    const dbPath = existingEnv['DB_PATH'] || (isProduction ? '/srv/pai_tv/pai_tv.db' : './db/pai_tv.db');
 
     console.log('\n=== PAI TV — Setup inicial ===\n');
 
@@ -48,11 +54,11 @@ async function main() {
 
     // Grava .env preservando variáveis externas (Gmail, etc.)
     const lines = [
-        `PORT=3000`,
+        `PORT=${port}`,
         `SESSION_SECRET=${secret}`,
         `VIDEOS_PATH=${videosPath}`,
         `DB_PATH=${dbPath}`,
-        ...Object.entries(preservedVars).map(([k, v]) => `${k}=${v}`),
+        ...Object.entries(preservedVars).filter(([k]) => !['PORT','VIDEOS_PATH','DB_PATH'].includes(k)).map(([k, v]) => `${k}=${v}`),
     ];
     fs.writeFileSync(envFile, lines.join('\n') + '\n');
 
