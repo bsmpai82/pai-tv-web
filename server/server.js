@@ -1,6 +1,13 @@
 require('dotenv').config();
+
+if (!process.env.SESSION_SECRET) {
+    console.error('FATAL: SESSION_SECRET não definido no .env');
+    process.exit(1);
+}
+
 const express = require('express');
 const session = require('express-session');
+const helmet = require('helmet');
 const path = require('path');
 const fs = require('fs');
 
@@ -32,6 +39,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Necessário para req.protocol retornar 'https' atrás do Caddy
 app.set('trust proxy', 1);
 
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -42,10 +50,10 @@ if (!fs.existsSync(THUMBS_PATH)) fs.mkdirSync(THUMBS_PATH, { recursive: true });
 app.use('/thumbs', express.static(path.resolve(THUMBS_PATH)));
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'pai-tv-secret-change-me',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 8 * 60 * 60 * 1000, sameSite: 'lax', httpOnly: true } // 8 horas
+    cookie: { maxAge: 8 * 60 * 60 * 1000, sameSite: 'lax', httpOnly: true, secure: true } // 8 horas
 }));
 
 app.use('/', authRoutes);

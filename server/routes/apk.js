@@ -17,7 +17,7 @@ if (!fs.existsSync(RELEASES_PATH)) {
 }
 
 function generateToken() {
-    return crypto.randomBytes(6).toString('hex');
+    return crypto.randomBytes(16).toString('hex');
 }
 
 function ensureApkToken() {
