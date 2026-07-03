@@ -267,7 +267,9 @@ Em ambos o app abre automaticamente no boot. Se o usuário sair (botão HOME), o
 
 **Por que o `pm suspend` no Intelbras:** o firmware (Android 14) reseta o HOME preferido de volta pro launcher Google a cada boot, mesmo com o role `android.app.role.HOME` correto. `pm disable-user` e `pm uninstall --user 0` são bloqueados ("Warning! This command is illegal!" / "core application"). `pm suspend` passa, sobrevive ao reboot e impede o reset — o PAI TV abre sozinho no boot.
 
-**Script pronto (Windows):** `deploy/kiosk-intelbras.ps1` automatiza diagnóstico, aplicação e reversão no Intelbras: `.\deploy\kiosk-intelbras.ps1 -Ip <IP> -Flavor prod -Aplicar` (use `-Flavor homolog` para o app HML; `-Reverter` devolve o launcher original). O install do APK continua manual (blocos abaixo).
+**Scripts prontos:** automatizam diagnóstico, aplicação e reversão no Intelbras. O install do APK continua manual (blocos abaixo).
+- Windows: `.\deploy\kiosk-intelbras.ps1 -Ip <IP> -Flavor prod -Aplicar` (`-Flavor homolog` para o HML; `-Reverter` devolve o launcher)
+- Linux: `./deploy/kiosk-intelbras.sh -i <IP> -f prod -a` (`-f homolog`; `-r` reverte; sem flags após o IP = só diagnóstico)
 
 ### Passo a passo (por stick)
 
