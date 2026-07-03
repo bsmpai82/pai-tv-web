@@ -187,6 +187,8 @@ pm2 restart all              # Reinicia o servidor
 
 ### Pendente
 - [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
+- [x] **Autostart no Intelbras validado em homolog** (2026-07-03) — receita: `set-home-activity` + `pm suspend` no launcher (`deploy/kiosk-intelbras.ps1 -Aplicar`). Nota: a hipótese do launcherx estava errada — o firmware usa o `tvlauncher` antigo, mas bloqueia `pm disable-user`/`pm uninstall` e reseta o HOME preferido no boot; `pm suspend` contorna. Ver runbook "Provisionar novo stick".
+- [ ] **Replicar kiosk do Intelbras em produção** (`com.paitv`) — mesma receita validada em homolog; requer aprovação explícita antes de aplicar nos sticks de produção.
 - [x] Watchdog no app: relança MainActivity se sair do foreground (intervalo: 1 min, `SyncService.kt`)
 - [x] Autostart validado no Fire TV Stick via `cmd package set-home-activity` — ver seção "Provisionar novo stick"
 
@@ -252,16 +254,18 @@ adb install $APK
 
 ## Provisionar novo stick (modo kiosk com autostart)
 
-Runbook validado no **IZY Play Intelbras** (2026-04-18) e **Fire TV Stick Amazon** (2026-06-04).
+Runbook validado no **IZY Play Intelbras** (2026-07-03, homolog) e **Fire TV Stick Amazon** (2026-06-04).
 
 ### Estratégia por dispositivo
 
 | Dispositivo | Método de kiosk | Launcher a tratar |
 | --- | --- | --- |
-| Intelbras IZY Play | `pm disable-user` (desabilita launcher) | `com.google.android.tvlauncher` |
+| Intelbras IZY Play | `set-home-activity` + `pm suspend` no launcher | `com.google.android.tvlauncher` (protegido: disable/uninstall bloqueados pelo OEM) |
 | Fire TV Stick | `cmd package set-home-activity` (define HOME) | `com.amazon.tv.launcher` (protegido, não pode desabilitar) |
 
-Em ambos o app abre automaticamente no boot. No Fire TV o launcher Amazon permanece em background — se o usuário sair, o **watchdog** (SyncService) relança o PAI TV em até 1 minuto.
+Em ambos o app abre automaticamente no boot. Se o usuário sair (botão HOME), o **watchdog** (SyncService) relança o PAI TV em até 1 minuto. No Intelbras, apertar HOME mostra por alguns segundos o diálogo "app suspenso" do sistema até o watchdog agir — comportamento esperado.
+
+**Por que o `pm suspend` no Intelbras:** o firmware (Android 14) reseta o HOME preferido de volta pro launcher Google a cada boot, mesmo com o role `android.app.role.HOME` correto. `pm disable-user` e `pm uninstall --user 0` são bloqueados ("Warning! This command is illegal!" / "core application"). `pm suspend` passa, sobrevive ao reboot e impede o reset — o PAI TV abre sozinho no boot.
 
 ### Passo a passo (por stick)
 
@@ -281,7 +285,8 @@ $IP  = "192.168.31.129"  # trocar pelo IP do stick
 & $ADB uninstall com.paitv
 & $ADB install $APK
 & $ADB shell am start -n com.paitv/.MainActivity
-& $ADB shell pm disable-user --user 0 com.google.android.tvlauncher
+& $ADB shell cmd package set-home-activity com.paitv/.MainActivity
+& $ADB shell pm suspend com.google.android.tvlauncher
 & $ADB reboot
 ```
 
@@ -309,7 +314,8 @@ adb connect ${IP}:5555
 adb uninstall com.paitv
 adb install $APK
 adb shell am start -n com.paitv/.MainActivity
-adb shell pm disable-user --user 0 com.google.android.tvlauncher
+adb shell cmd package set-home-activity com.paitv/.MainActivity
+adb shell pm suspend com.google.android.tvlauncher
 adb reboot
 ```
 
@@ -350,8 +356,9 @@ Pacotes comuns:
 **Intelbras:**
 
 ```powershell
-& $ADB shell pm enable com.google.android.tvlauncher
-& $ADB shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
+& $ADB shell pm unsuspend com.google.android.tvlauncher
+& $ADB shell cmd package set-home-activity com.google.android.tvlauncher/com.google.android.tvlauncher.MainActivity
+& $ADB reboot
 ```
 
 **Fire TV Stick:**
@@ -370,6 +377,10 @@ Já testados e descartados. **Não tente novamente**:
 2. **`pm disable-user` no Fire TV Stick** — retorna `SecurityException: Cannot disable a protected package: com.amazon.tv.launcher`. Usar `set-home-activity` em vez disso.
 
 3. **Fallback via `BootReceiver` escutando `BOOT_COMPLETED`** — após `adb install`, o app fica em "stopped state" e o Android 10+ **não entrega broadcasts implícitos** (inclusive `BOOT_COMPLETED`) até ele ser iniciado manualmente uma vez. Mesmo depois de iniciar, o Intelbras entrega o broadcast para outros receivers mas não pro nosso — comportamento inconsistente por OEM.
+
+4. **`pm disable-user` / `pm uninstall --user 0` no launcher do Intelbras** — o firmware bloqueia ambos ("Warning! This command is illegal!" e "core application... can not be uninstalled"), tanto no pacote quanto no componente. Usar `pm suspend` em vez disso.
+
+5. **`set-home-activity` sozinho no Intelbras** — o comando grava a preferência corretamente (verificável em `dumpsys package preferred`), mas **o boot do firmware a reseta** de volta pro launcher Google, mesmo com o role `android.app.role.HOME` apontando pro PAI TV. Só funciona combinado com `pm suspend` no launcher.
 
 O código do BootReceiver continua no projeto como "cinto de segurança". O **watchdog** no SyncService complementa: verifica a cada 1 minuto se a MainActivity está em foreground e a relança se necessário.
 
