@@ -188,7 +188,7 @@ pm2 restart all              # Reinicia o servidor
 ### Pendente
 - [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
 - [x] **Autostart no Intelbras validado em homolog** (2026-07-03) — receita: `set-home-activity` + `pm suspend` no launcher (`deploy/kiosk-intelbras.ps1 -Aplicar`). Nota: a hipótese do launcherx estava errada — o firmware usa o `tvlauncher` antigo, mas bloqueia `pm disable-user`/`pm uninstall` e reseta o HOME preferido no boot; `pm suspend` contorna. Ver runbook "Provisionar novo stick".
-- [ ] **Replicar kiosk do Intelbras em produção** (`com.paitv`) — mesma receita validada em homolog; requer aprovação explícita antes de aplicar nos sticks de produção.
+- [x] **Kiosk do Intelbras replicado em produção** (2026-07-03) — stick de teste rodando o app prod (`com.paitv`) com a mesma receita; os 3 testes (boot, HOME+watchdog, cold boot) passaram e o dispositivo aparece online no painel. Script agora aceita `-Flavor prod|homolog`.
 - [x] Watchdog no app: relança MainActivity se sair do foreground (intervalo: 1 min, `SyncService.kt`)
 - [x] Autostart validado no Fire TV Stick via `cmd package set-home-activity` — ver seção "Provisionar novo stick"
 
@@ -236,7 +236,7 @@ cd ~/pai-tv-web/android
 ### Windows (casa)
 ```powershell
 $ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\prod\debug\app-prod-debug.apk"
 & $ADB connect <IP-do-stick>:5555
 & $ADB uninstall com.paitv
 & $ADB install $APK
@@ -244,7 +244,7 @@ $APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
 
 ### Linux (trabalho)
 ```bash
-APK=~/pai-tv-web/android/app/build/outputs/apk/debug/app-debug.apk
+APK=~/pai-tv-web/android/app/build/outputs/apk/prod/debug/app-prod-debug.apk
 adb connect <IP-do-stick>:5555
 adb uninstall com.paitv
 adb install $APK
@@ -267,6 +267,8 @@ Em ambos o app abre automaticamente no boot. Se o usuário sair (botão HOME), o
 
 **Por que o `pm suspend` no Intelbras:** o firmware (Android 14) reseta o HOME preferido de volta pro launcher Google a cada boot, mesmo com o role `android.app.role.HOME` correto. `pm disable-user` e `pm uninstall --user 0` são bloqueados ("Warning! This command is illegal!" / "core application"). `pm suspend` passa, sobrevive ao reboot e impede o reset — o PAI TV abre sozinho no boot.
 
+**Script pronto (Windows):** `deploy/kiosk-intelbras.ps1` automatiza diagnóstico, aplicação e reversão no Intelbras: `.\deploy\kiosk-intelbras.ps1 -Ip <IP> -Flavor prod -Aplicar` (use `-Flavor homolog` para o app HML; `-Reverter` devolve o launcher original). O install do APK continua manual (blocos abaixo).
+
 ### Passo a passo (por stick)
 
 Preparação no stick (uma vez):
@@ -278,7 +280,7 @@ Preparação no stick (uma vez):
 
 ```powershell
 $ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\prod\debug\app-prod-debug.apk"
 $IP  = "192.168.31.129"  # trocar pelo IP do stick
 
 & $ADB connect "${IP}:5555"
@@ -294,7 +296,7 @@ $IP  = "192.168.31.129"  # trocar pelo IP do stick
 
 ```powershell
 $ADB = "C:\Users\Dimozi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\debug\app-debug.apk"
+$APK = "D:\DEV\pai-tv-web\android\app\build\outputs\apk\prod\debug\app-prod-debug.apk"
 $IP  = "192.168.31.161"  # trocar pelo IP do stick
 
 & $ADB connect "${IP}:5555"
@@ -308,7 +310,7 @@ $IP  = "192.168.31.161"  # trocar pelo IP do stick
 
 ```bash
 IP="192.168.10.194"   # trocar pelo IP do stick
-APK=~/pai-tv-web/android/app/build/outputs/apk/debug/app-debug.apk
+APK=~/pai-tv-web/android/app/build/outputs/apk/prod/debug/app-prod-debug.apk
 
 adb connect ${IP}:5555
 adb uninstall com.paitv
@@ -323,7 +325,7 @@ adb reboot
 
 ```bash
 IP="192.168.31.161"   # trocar pelo IP do stick
-APK=~/pai-tv-web/android/app/build/outputs/apk/debug/app-debug.apk
+APK=~/pai-tv-web/android/app/build/outputs/apk/prod/debug/app-prod-debug.apk
 
 adb connect ${IP}:5555
 adb uninstall com.paitv

@@ -1,10 +1,6 @@
 # Diagnostico e correcao de autostart (modo kiosk) em stick Intelbras IZY Play.
 #
-# *** SCRIPT EXCLUSIVO DE HOMOLOGACAO ***
-# Mira apenas o app PAI TV HML (com.paitv.homolog) no stick de teste.
-# Suporte a producao sera adicionado em script separado apos validacao completa.
-#
-# Receita validada em 2026-07-03 (firmware Android 14 com launcher antigo tvlauncher):
+# Receita validada em homolog (2026-07-03) em firmware Android 14 com launcher antigo tvlauncher:
 #   - set-home-activity sozinho NAO basta: o boot do firmware re-fixa o launcher Google
 #     como HOME preferido (mAlways=true), mesmo com o role android.app.role.HOME correto.
 #   - pm disable-user e pm uninstall --user 0 sao BLOQUEADOS pelo OEM
@@ -15,11 +11,13 @@
 #     o watchdog do app (SyncService) relanca a MainActivity em ate 1 min.
 #
 # Uso:
-#   .\kiosk-intelbras.ps1 -Ip 192.168.31.182              # diagnostico apenas
-#   .\kiosk-intelbras.ps1 -Ip 192.168.31.182 -Aplicar     # PAI TV HML como HOME + suspende launcher
-#   .\kiosk-intelbras.ps1 -Ip 192.168.31.182 -Reverter    # devolve o launcher original
+#   .\kiosk-intelbras.ps1 -Ip 192.168.31.182                          # diagnostico apenas
+#   .\kiosk-intelbras.ps1 -Ip 192.168.31.182 -Aplicar                 # homolog (default) como HOME
+#   .\kiosk-intelbras.ps1 -Ip 192.168.31.182 -Flavor prod -Aplicar    # producao como HOME
+#   .\kiosk-intelbras.ps1 -Ip 192.168.31.182 -Reverter                # devolve o launcher original
 param(
     [Parameter(Mandatory)] [string]$Ip,
+    [ValidateSet("homolog", "prod")] [string]$Flavor = "homolog",
     [switch]$Aplicar,
     [switch]$Reverter
 )
@@ -27,8 +25,9 @@ param(
 $ADB = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 if (-not (Test-Path $ADB)) { Write-Error "adb nao encontrado em $ADB"; exit 1 }
 
-# Flavor homolog: applicationId com.paitv.homolog, classe da activity com.paitv.MainActivity
-$componente = "com.paitv.homolog/com.paitv.MainActivity"
+# A classe da activity e sempre com.paitv.MainActivity; o que muda por flavor e o applicationId
+$pacote = if ($Flavor -eq "prod") { "com.paitv" } else { "com.paitv.homolog" }
+$componente = "$pacote/com.paitv.MainActivity"
 $launcher   = "com.google.android.tvlauncher"
 
 & $ADB connect "${Ip}:5555"
@@ -62,6 +61,6 @@ if ($Aplicar) {
     & $ADB shell "dumpsys package preferred" | Select-Object -First 6
     Write-Host "`nReiniciando o stick para validar o boot..." -ForegroundColor Yellow
     & $ADB reboot
-    Write-Host "Apos o boot o PAI TV HML deve abrir sozinho em ~30-60s."
+    Write-Host "Apos o boot o PAI TV ($Flavor) deve abrir sozinho em ~30-60s."
     Write-Host "Valide tambem: botao HOME do controle -> watchdog relanca em ate 1 min; e cold boot (tomada)."
 }
