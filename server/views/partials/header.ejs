@@ -20,7 +20,7 @@
     <a href="/logs">Logs</a>
     <a href="/settings">Configurações</a>
     <% } %>
-    <% if (user && (user.role === 'master' || user.role === 'admin')) { %>
+    <% if (user) { %>
     <a href="/users">Usuários</a>
     <% } %>
     <span class="nav-user">

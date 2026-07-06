@@ -6,28 +6,30 @@ const { sendWelcomeEmail } = require('../services/mailer');
 const { validatePassword } = require('../services/passwordPolicy');
 const router = express.Router();
 
-// Apenas master e admin acessam /users
-router.use(requireRole('master', 'admin'));
+// Gestão de usuários (criar, deletar) exige master/admin;
+// usuário comum acessa /users apenas para ver a si mesmo e trocar a própria senha
+const requireAdmin = requireRole('master', 'admin');
 
 // Lista usuários
-// master vê todos; admin vê apenas usuários comuns
+// master vê todos; admin vê apenas usuários comuns; usuário comum vê só a si mesmo
 router.get('/', (req, res) => {
-    const isMaster = req.user.role === 'master';
-    const users = isMaster
-        ? db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users ORDER BY role, username`).all()
-        : db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users WHERE role = 'user' OR id = ? ORDER BY username`).all(req.user.id);
+    const users = req.user.role === 'user'
+        ? db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users WHERE id = ?`).all(req.user.id)
+        : req.user.role === 'master'
+            ? db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users ORDER BY role, username`).all()
+            : db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users WHERE role = 'user' OR id = ? ORDER BY username`).all(req.user.id);
 
     res.render('users', { title: 'Usuários', users, message: req.query.msg || null, error: req.query.err || null });
 });
 
 // Formulário de novo usuário
-router.get('/novo', (req, res) => {
+router.get('/novo', requireAdmin, (req, res) => {
     const devices = db.prepare('SELECT id, name, device_uuid FROM devices ORDER BY name').all();
     res.render('user-edit', { title: 'Novo Usuário', editUser: null, devices, selectedDevices: [], message: null, error: null });
 });
 
 // Cria usuário
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     const { username, password, email, role } = req.body;
 
     if (!username || !password) {
@@ -65,6 +67,10 @@ router.get('/:id/editar', (req, res) => {
     if (!editUser) return res.redirect('/users?err=Usuário não encontrado.');
 
     const isSelf = editUser.id === req.user.id;
+    // Usuário comum só pode editar a si mesmo
+    if (req.user.role === 'user' && !isSelf) {
+        return res.redirect('/users?err=Sem permissão para editar este usuário.');
+    }
     // Admin só pode editar usuários comuns (ou a si mesmo)
     if (req.user.role === 'admin' && !isSelf && editUser.role !== 'user') {
         return res.redirect('/users?err=Sem permissão para editar este usuário.');
@@ -79,14 +85,39 @@ router.get('/:id/editar', (req, res) => {
 
 // Salva edição
 router.post('/:id', async (req, res) => {
-    const { username, password, email, role, ativo, devices } = req.body;
+    const { username, password, currentPassword, email, role, ativo, devices } = req.body;
     const targetId = parseInt(req.params.id);
 
-    const editUser = db.prepare('SELECT id, role FROM users WHERE id = ?').get(targetId);
+    const editUser = db.prepare('SELECT id, role, password_hash FROM users WHERE id = ?').get(targetId);
     if (!editUser) return res.redirect('/users?err=Usuário não encontrado.');
     const isSelf = targetId === req.user.id;
+    if (req.user.role === 'user' && !isSelf) {
+        return res.redirect('/users?err=Sem permissão para editar este usuário.');
+    }
     if (req.user.role === 'admin' && !isSelf && editUser.role !== 'user') {
         return res.redirect('/users?err=Sem permissão para editar este usuário.');
+    }
+
+    // Trocar a própria senha exige confirmar a senha atual (todos os perfis)
+    if (password && isSelf) {
+        const confirmado = currentPassword && await bcrypt.compare(currentPassword, editUser.password_hash);
+        if (!confirmado) {
+            return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent('Senha atual incorreta.'));
+        }
+    }
+
+    // Usuário comum só altera a própria senha — demais campos permanecem os do banco
+    if (req.user.role === 'user') {
+        if (!password) {
+            return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent('Informe a nova senha.'));
+        }
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
+        }
+        const hash = await bcrypt.hash(password, 10);
+        db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, targetId);
+        return res.redirect('/users?msg=' + encodeURIComponent('Senha alterada com sucesso.'));
     }
 
     // Auto-edição preserva role e ativo atuais (impede auto-bloqueio)
@@ -128,7 +159,7 @@ router.post('/:id', async (req, res) => {
 });
 
 // Deleta usuário
-router.post('/:id/deletar', (req, res) => {
+router.post('/:id/deletar', requireAdmin, (req, res) => {
     const targetId = parseInt(req.params.id);
 
     if (targetId === req.user.id) {

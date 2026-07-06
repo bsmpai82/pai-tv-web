@@ -7,18 +7,33 @@
 
 <div class="box">
     <form action="/users/<%= editUser.id %>" method="POST">
+        <% const selfService = user.role === 'user'; // usuário comum: só troca a própria senha %>
         <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">
             <div>
                 <label>Usuário</label>
+                <% if (selfService) { %>
+                <input type="text" value="<%= editUser.username %>" disabled>
+                <% } else { %>
                 <input type="text" name="username" value="<%= editUser.username %>" required>
+                <% } %>
             </div>
+            <% if (isSelf) { %>
             <div>
-                <label>Nova senha (deixe em branco para manter)</label>
-                <input type="password" name="password" minlength="12" placeholder="mín. 12 caracteres, 3 tipos (Aa/0-9/símbolo)" autocomplete="new-password">
+                <label>Senha atual</label>
+                <input type="password" name="currentPassword" placeholder="confirme a senha atual" autocomplete="current-password" <%= selfService ? 'required' : '' %>>
+            </div>
+            <% } %>
+            <div>
+                <label>Nova senha<%= selfService ? '' : ' (deixe em branco para manter)' %></label>
+                <input type="password" name="password" minlength="12" placeholder="mín. 12 caracteres, 3 tipos (Aa/0-9/símbolo)" autocomplete="new-password" <%= selfService ? 'required' : '' %>>
             </div>
             <div>
                 <label>E-mail</label>
+                <% if (selfService) { %>
+                <input type="email" value="<%= editUser.email || '' %>" disabled>
+                <% } else { %>
                 <input type="email" name="email" value="<%= editUser.email || '' %>">
+                <% } %>
             </div>
             <% if (user.role === 'master' && !isSelf) { %>
             <div>
@@ -41,7 +56,7 @@
             <% } %>
         </div>
 
-        <% if (editUser.role === 'user' || (user.role === 'master')) { %>
+        <% if (user.role !== 'user' && (editUser.role === 'user' || user.role === 'master')) { %>
         <div style="margin-bottom:16px">
             <label><strong>Dispositivos permitidos</strong> (apenas para usuário comum)</label>
             <p style="color:#888;font-size:0.9em;margin:4px 0 8px">

@@ -5,6 +5,7 @@
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
+<% if (user.role !== 'user') { %>
 <div class="box" style="margin-bottom:24px">
     <h2>Novo usuário</h2>
     <form action="/users" method="POST" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
@@ -33,6 +34,7 @@
         <button type="submit" class="btn btn-primary">Criar</button>
     </form>
 </div>
+<% } %>
 
 <div class="box">
     <h2>Usuários cadastrados (<%= users.length %>)</h2>
