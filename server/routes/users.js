@@ -106,18 +106,20 @@ router.post('/:id', async (req, res) => {
         }
     }
 
-    // Usuário comum só altera a própria senha — demais campos permanecem os do banco
+    // Usuário comum altera apenas a própria senha e o próprio e-mail —
+    // username/role/ativo/dispositivos permanecem os do banco
     if (req.user.role === 'user') {
-        if (!password) {
-            return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent('Informe a nova senha.'));
+        if (password) {
+            const passwordError = validatePassword(password);
+            if (passwordError) {
+                return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
+            }
+            const hash = await bcrypt.hash(password, 10);
+            db.prepare('UPDATE users SET password_hash = ?, email = ? WHERE id = ?').run(hash, email?.trim() || null, targetId);
+        } else {
+            db.prepare('UPDATE users SET email = ? WHERE id = ?').run(email?.trim() || null, targetId);
         }
-        const passwordError = validatePassword(password);
-        if (passwordError) {
-            return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
-        }
-        const hash = await bcrypt.hash(password, 10);
-        db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, targetId);
-        return res.redirect('/users?msg=' + encodeURIComponent('Senha alterada com sucesso.'));
+        return res.redirect('/users?msg=' + encodeURIComponent('Dados atualizados com sucesso.'));
     }
 
     // Auto-edição preserva role e ativo atuais (impede auto-bloqueio)
