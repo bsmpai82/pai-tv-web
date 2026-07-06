@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const readline = require('readline');
+const { validatePassword, PASSWORD_HINT } = require('./services/passwordPolicy');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -41,12 +42,13 @@ async function main() {
     console.log('\n=== PAI TV — Setup inicial ===\n');
 
     const username = (await ask('Nome de usuário master [admin]: ')).trim() || 'admin';
-    const password = (await ask('Senha do usuário master (mínimo 6 caracteres): ')).trim();
+    const password = (await ask(`Senha do usuário master (${PASSWORD_HINT}): `)).trim();
 
     rl.close();
 
-    if (password.length < 6) {
-        console.error('Senha muito curta. Mínimo 6 caracteres.');
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+        console.error(passwordError);
         process.exit(1);
     }
 

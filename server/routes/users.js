@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const db = require('../db/database');
 const requireRole = require('../middleware/requireRole');
 const { sendWelcomeEmail } = require('../services/mailer');
+const { validatePassword } = require('../services/passwordPolicy');
 const router = express.Router();
 
 // Apenas master e admin acessam /users
@@ -32,8 +33,9 @@ router.post('/', async (req, res) => {
     if (!username || !password) {
         return res.redirect('/users?err=Usuário e senha são obrigatórios.');
     }
-    if (password.length < 6) {
-        return res.redirect('/users?err=Senha muito curta (mínimo 6 caracteres).');
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+        return res.redirect('/users?err=' + encodeURIComponent(passwordError));
     }
 
     // Admin só pode criar usuários comuns
@@ -72,7 +74,7 @@ router.get('/:id/editar', (req, res) => {
     const selectedDevices = db.prepare('SELECT device_id FROM user_devices WHERE user_id = ?')
         .all(req.params.id).map(r => r.device_id);
 
-    res.render('user-edit', { title: 'Editar Usuário', editUser, devices, selectedDevices, isSelf, message: null, error: null });
+    res.render('user-edit', { title: 'Editar Usuário', editUser, devices, selectedDevices, isSelf, message: req.query.msg || null, error: req.query.err || null });
 });
 
 // Salva edição
@@ -93,7 +95,11 @@ router.post('/:id', async (req, res) => {
     const isAtivo = isSelf ? 1 : (ativo === '1' ? 1 : 0);
 
     try {
-        if (password && password.length >= 6) {
+        if (password) {
+            const passwordError = validatePassword(password);
+            if (passwordError) {
+                return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
+            }
             const hash = await bcrypt.hash(password, 10);
             db.prepare('UPDATE users SET username = ?, password_hash = ?, email = ?, role = ?, ativo = ? WHERE id = ?')
                 .run(username.trim(), hash, email?.trim() || null, targetRole, isAtivo, targetId);
