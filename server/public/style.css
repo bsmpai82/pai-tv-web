@@ -70,6 +70,11 @@ body.login-page {
     border: none; border-radius: 6px; font-size: 15px; cursor: pointer;
 }
 .login-box button:hover { background: #2a2a4e; }
+.login-box p.env-badge {
+    background: #fff3cd; color: #856404; border: 1px solid #ffeeba;
+    border-radius: 6px; padding: 6px 10px; font-weight: bold;
+    font-size: 12px; letter-spacing: 1px; margin: -16px 0 24px;
+}
 
 /* ALERTS */
 .alert {

@@ -9,6 +9,9 @@
     <div class="login-box">
         <h1>PAI TV</h1>
         <p>Painel de gerenciamento de vídeos</p>
+        <% if (appEnv === 'homolog') { %>
+            <p class="env-badge">AMBIENTE DE HOMOLOGAÇÃO</p>
+        <% } %>
         <% if (error) { %>
             <div class="alert alert-error"><%= error %></div>
         <% } %>

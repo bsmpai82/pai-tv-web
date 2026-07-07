@@ -28,6 +28,7 @@ if [ ! -f "$SERVER_DIR/.env" ]; then
   SECRET=$(openssl rand -hex 32)
   cat > "$SERVER_DIR/.env" <<EOF
 PORT=3001
+APP_ENV=homolog
 DB_PATH=./db/pai_tv_homolog.db
 VIDEOS_PATH=./uploads
 THUMBS_PATH=/srv/pai_tv_homolog/thumbs

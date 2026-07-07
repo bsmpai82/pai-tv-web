@@ -28,6 +28,8 @@ const { startAlertChecker } = require('./services/alertChecker');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+// Ambiente atual (ex: 'homolog') — disponível em todas as views
+app.locals.appEnv = process.env.APP_ENV || '';
 const VIDEOS_PATH = process.env.VIDEOS_PATH || './uploads';
 
 if (!fs.existsSync(VIDEOS_PATH)) {
