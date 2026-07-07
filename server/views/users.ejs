@@ -36,6 +36,9 @@
 </div>
 <% } %>
 
+<% // Datas em DD/MM/AAAA no fuso do Brasil (SQLite grava CURRENT_TIMESTAMP em UTC)
+   const fmtData = v => v ? new Date(v.replace(' ', 'T') + 'Z')
+       .toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : '—'; %>
 <div class="box">
     <h2>Usuários cadastrados (<%= users.length %>)</h2>
     <% if (users.length === 0) { %>
@@ -60,8 +63,8 @@
                 <td><%= u.email || '—' %></td>
                 <td><span class="role-badge role-<%= u.role %>"><%= u.role %></span></td>
                 <td><%= u.ativo ? 'Ativo' : 'Inativo' %></td>
-                <td><%= u.created_at ? u.created_at.slice(0,10) : '—' %></td>
-                <td><%= u.password_changed_at ? u.password_changed_at.slice(0,10) : '—' %></td>
+                <td><%= fmtData(u.created_at) %></td>
+                <td><%= fmtData(u.password_changed_at) %></td>
                 <td>
                     <a href="/users/<%= u.id %>/editar" class="btn btn-sm">Editar</a>
                     <% if (u.id !== user.id) { %>
