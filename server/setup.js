@@ -70,11 +70,11 @@ async function main() {
 
     const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
     if (existing) {
-        db.prepare('UPDATE users SET password_hash = ?, role = ?, ativo = 1 WHERE username = ?')
+        db.prepare('UPDATE users SET password_hash = ?, role = ?, ativo = 1, password_changed_at = CURRENT_TIMESTAMP WHERE username = ?')
             .run(hash, 'master', username);
         console.log(`\nUsuário master "${username}" atualizado.`);
     } else {
-        db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)')
+        db.prepare('INSERT INTO users (username, password_hash, role, password_changed_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)')
             .run(username, hash, 'master');
         console.log(`\nUsuário master "${username}" criado.`);
     }

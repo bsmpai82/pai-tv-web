@@ -49,6 +49,7 @@
                 <th>Perfil</th>
                 <th>Status</th>
                 <th>Criado em</th>
+                <th>Senha alterada em</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -60,6 +61,7 @@
                 <td><span class="role-badge role-<%= u.role %>"><%= u.role %></span></td>
                 <td><%= u.ativo ? 'Ativo' : 'Inativo' %></td>
                 <td><%= u.created_at ? u.created_at.slice(0,10) : '—' %></td>
+                <td><%= u.password_changed_at ? u.password_changed_at.slice(0,10) : '—' %></td>
                 <td>
                     <a href="/users/<%= u.id %>/editar" class="btn btn-sm">Editar</a>
                     <% if (u.id !== user.id) { %>

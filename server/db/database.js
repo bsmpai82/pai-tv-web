@@ -73,6 +73,7 @@ const migrations = [
     )`,
     `ALTER TABLE videos ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL`,
     `ALTER TABLE playlists ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL`,
+    `ALTER TABLE users ADD COLUMN password_changed_at DATETIME`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

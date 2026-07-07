@@ -14,10 +14,10 @@ const requireAdmin = requireRole('master', 'admin');
 // master vê todos; admin vê apenas usuários comuns; usuário comum vê só a si mesmo
 router.get('/', (req, res) => {
     const users = req.user.role === 'user'
-        ? db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users WHERE id = ?`).all(req.user.id)
+        ? db.prepare(`SELECT id, username, email, role, ativo, created_at, password_changed_at FROM users WHERE id = ?`).all(req.user.id)
         : req.user.role === 'master'
-            ? db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users ORDER BY role, username`).all()
-            : db.prepare(`SELECT id, username, email, role, ativo, created_at FROM users WHERE role = 'user' OR id = ? ORDER BY username`).all(req.user.id);
+            ? db.prepare(`SELECT id, username, email, role, ativo, created_at, password_changed_at FROM users ORDER BY role, username`).all()
+            : db.prepare(`SELECT id, username, email, role, ativo, created_at, password_changed_at FROM users WHERE role = 'user' OR id = ? ORDER BY username`).all(req.user.id);
 
     res.render('users', { title: 'Usuários', users, message: req.query.msg || null, error: req.query.err || null });
 });
@@ -47,7 +47,7 @@ router.post('/', requireAdmin, async (req, res) => {
 
     try {
         const hash = await bcrypt.hash(password, 10);
-        db.prepare('INSERT INTO users (username, password_hash, email, role) VALUES (?, ?, ?, ?)')
+        db.prepare('INSERT INTO users (username, password_hash, email, role, password_changed_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)')
             .run(username.trim(), hash, email?.trim() || null, targetRole);
         const newUser = db.prepare('SELECT id, username, email, role FROM users WHERE username = ?').get(username.trim());
         const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -115,7 +115,7 @@ router.post('/:id', async (req, res) => {
                 return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
             }
             const hash = await bcrypt.hash(password, 10);
-            db.prepare('UPDATE users SET password_hash = ?, email = ? WHERE id = ?').run(hash, email?.trim() || null, targetId);
+            db.prepare('UPDATE users SET password_hash = ?, email = ?, password_changed_at = CURRENT_TIMESTAMP WHERE id = ?').run(hash, email?.trim() || null, targetId);
         } else {
             db.prepare('UPDATE users SET email = ? WHERE id = ?').run(email?.trim() || null, targetId);
         }
@@ -134,7 +134,7 @@ router.post('/:id', async (req, res) => {
                 return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
             }
             const hash = await bcrypt.hash(password, 10);
-            db.prepare('UPDATE users SET username = ?, password_hash = ?, email = ?, role = ?, ativo = ? WHERE id = ?')
+            db.prepare('UPDATE users SET username = ?, password_hash = ?, email = ?, role = ?, ativo = ?, password_changed_at = CURRENT_TIMESTAMP WHERE id = ?')
                 .run(username.trim(), hash, email?.trim() || null, targetRole, isAtivo, targetId);
         } else {
             db.prepare('UPDATE users SET username = ?, email = ?, role = ?, ativo = ? WHERE id = ?')
