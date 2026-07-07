@@ -63,7 +63,7 @@ router.post('/', requireAdmin, async (req, res) => {
 
 // Formulário de edição
 router.get('/:id/editar', (req, res) => {
-    const editUser = db.prepare('SELECT id, username, email, role, ativo FROM users WHERE id = ?').get(req.params.id);
+    const editUser = db.prepare('SELECT id, username, email, role, ativo, must_change_password FROM users WHERE id = ?').get(req.params.id);
     if (!editUser) return res.redirect('/users?err=Usuário não encontrado.');
 
     const isSelf = editUser.id === req.user.id;
@@ -115,7 +115,7 @@ router.post('/:id', async (req, res) => {
                 return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
             }
             const hash = await bcrypt.hash(password, 10);
-            db.prepare('UPDATE users SET password_hash = ?, email = ?, password_changed_at = CURRENT_TIMESTAMP WHERE id = ?').run(hash, email?.trim() || null, targetId);
+            db.prepare('UPDATE users SET password_hash = ?, email = ?, password_changed_at = CURRENT_TIMESTAMP, must_change_password = 0 WHERE id = ?').run(hash, email?.trim() || null, targetId);
         } else {
             db.prepare('UPDATE users SET email = ? WHERE id = ?').run(email?.trim() || null, targetId);
         }
@@ -126,6 +126,10 @@ router.post('/:id', async (req, res) => {
     const targetRole = isSelf ? editUser.role
         : req.user.role === 'master' ? (role || editUser.role) : 'user';
     const isAtivo = isSelf ? 1 : (ativo === '1' ? 1 : 0);
+    // Editando outro: checkbox define a flag de troca obrigatória;
+    // trocando a própria senha: limpa; auto-edição sem senha: preserva (null → COALESCE)
+    const mustChange = !isSelf ? (req.body.mustChange === '1' ? 1 : 0)
+        : password ? 0 : null;
 
     try {
         if (password) {
@@ -134,11 +138,11 @@ router.post('/:id', async (req, res) => {
                 return res.redirect(`/users/${targetId}/editar?err=` + encodeURIComponent(passwordError));
             }
             const hash = await bcrypt.hash(password, 10);
-            db.prepare('UPDATE users SET username = ?, password_hash = ?, email = ?, role = ?, ativo = ?, password_changed_at = CURRENT_TIMESTAMP WHERE id = ?')
-                .run(username.trim(), hash, email?.trim() || null, targetRole, isAtivo, targetId);
+            db.prepare('UPDATE users SET username = ?, password_hash = ?, email = ?, role = ?, ativo = ?, password_changed_at = CURRENT_TIMESTAMP, must_change_password = ? WHERE id = ?')
+                .run(username.trim(), hash, email?.trim() || null, targetRole, isAtivo, mustChange, targetId);
         } else {
-            db.prepare('UPDATE users SET username = ?, email = ?, role = ?, ativo = ? WHERE id = ?')
-                .run(username.trim(), email?.trim() || null, targetRole, isAtivo, targetId);
+            db.prepare('UPDATE users SET username = ?, email = ?, role = ?, ativo = ?, must_change_password = COALESCE(?, must_change_password) WHERE id = ?')
+                .run(username.trim(), email?.trim() || null, targetRole, isAtivo, mustChange, targetId);
         }
 
         // Atualiza dispositivos permitidos (apenas para role 'user')

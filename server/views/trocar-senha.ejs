@@ -1,0 +1,24 @@
+<%- include('partials/header', { title: title }) %>
+
+<h1>Troca de senha obrigatória</h1>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="box">
+    <p style="margin-bottom:16px">Um administrador exigiu a troca da sua senha. Defina uma nova senha para continuar usando o painel.</p>
+    <form action="/trocar-senha" method="POST">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+            <div>
+                <label>Senha atual</label>
+                <input type="password" name="currentPassword" required autocomplete="current-password">
+            </div>
+            <div>
+                <label>Nova senha</label>
+                <input type="password" name="password" required minlength="12" placeholder="mín. 12 caracteres, 3 tipos (Aa/0-9/símbolo)" autocomplete="new-password">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar nova senha</button>
+    </form>
+</div>
+
+<%- include('partials/footer') %>

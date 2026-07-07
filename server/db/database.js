@@ -74,6 +74,7 @@ const migrations = [
     `ALTER TABLE videos ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL`,
     `ALTER TABLE playlists ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL`,
     `ALTER TABLE users ADD COLUMN password_changed_at DATETIME`,
+    `ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }

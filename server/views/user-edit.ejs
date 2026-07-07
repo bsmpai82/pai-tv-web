@@ -49,6 +49,13 @@
                     <option value="0" <%= !editUser.ativo ? 'selected' : '' %>>Inativo</option>
                 </select>
             </div>
+            <div>
+                <label>Segurança</label>
+                <label style="display:flex;align-items:center;gap:6px;font-weight:normal;padding-top:6px">
+                    <input type="checkbox" name="mustChange" value="1" <%= editUser.must_change_password ? 'checked' : '' %>>
+                    Exigir troca de senha no próximo login
+                </label>
+            </div>
             <% } %>
         </div>
 
