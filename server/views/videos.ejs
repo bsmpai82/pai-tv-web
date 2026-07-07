@@ -96,6 +96,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
                 <th>Tamanho</th>
                 <th>Em playlists</th>
                 <th>Enviado em</th>
+                <th>Enviado por</th>
                 <th></th>
             </tr>
         </thead>
@@ -113,6 +114,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
                 <td><%= (v.size / 1024 / 1024).toFixed(1) %> MB</td>
                 <td><%= v.playlist_count %></td>
                 <td><%= new Date(v.created_at).toLocaleString('pt-BR') %></td>
+                <td><%= v.owner_name || '—' %></td>
                 <td>
                     <form action="/videos/<%= v.id %>/delete" method="POST"
                           onsubmit="return confirm('Remover este vídeo permanentemente?')">
