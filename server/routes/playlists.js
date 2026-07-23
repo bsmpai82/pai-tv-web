@@ -14,15 +14,15 @@ function isOwnerOrElevated(req, playlist) {
 router.get('/', (req, res) => {
     const isUser = req.user.role === 'user';
     const query = isUser
-        ? `SELECT p.*, COUNT(pv.video_id) AS video_count
+        ? `SELECT p.*, COUNT(pi.id) AS item_count
            FROM playlists p
-           LEFT JOIN playlist_videos pv ON pv.playlist_id = p.id
+           LEFT JOIN playlist_items pi ON pi.playlist_id = p.id
            WHERE p.owner_id = ?
            GROUP BY p.id
            ORDER BY p.created_at DESC`
-        : `SELECT p.*, COUNT(pv.video_id) AS video_count
+        : `SELECT p.*, COUNT(pi.id) AS item_count
            FROM playlists p
-           LEFT JOIN playlist_videos pv ON pv.playlist_id = p.id
+           LEFT JOIN playlist_items pi ON pi.playlist_id = p.id
            GROUP BY p.id
            ORDER BY p.created_at DESC`;
 
@@ -48,104 +48,122 @@ router.get('/:id', (req, res) => {
     if (!playlist) return res.redirect('/playlists?err=Playlist+não+encontrada.');
     if (!isOwnerOrElevated(req, playlist)) return res.redirect('/playlists?err=Sem+permissão+para+acessar+esta+playlist.');
 
-    const videos = db.prepare(`
-        SELECT v.*, pv.position FROM videos v
-        JOIN playlist_videos pv ON pv.video_id = v.id
-        WHERE pv.playlist_id = ?
-        ORDER BY pv.position ASC, v.original_name ASC
+    const items = db.prepare(`
+        SELECT pi.id AS item_id, pi.media_type, pi.position,
+               CASE WHEN pi.media_type = 'video' THEN v.original_name ELSE im.original_name END AS original_name,
+               CASE WHEN pi.media_type = 'video' THEN v.size ELSE im.size END AS size,
+               im.duration_seconds AS duration_seconds
+        FROM playlist_items pi
+        LEFT JOIN videos v ON pi.media_type = 'video' AND pi.media_id = v.id
+        LEFT JOIN images im ON pi.media_type = 'image' AND pi.media_id = im.id
+        WHERE pi.playlist_id = ?
+          AND ((pi.media_type = 'video' AND v.id IS NOT NULL) OR (pi.media_type = 'image' AND im.id IS NOT NULL))
+        ORDER BY pi.position ASC, pi.id ASC
     `).all(playlist.id);
 
-    // Usuário comum vê apenas os próprios vídeos disponíveis para adicionar
+    // Usuário comum vê apenas os próprios itens disponíveis para adicionar
     const isUser = req.user.role === 'user';
     const allVideos = isUser
         ? db.prepare(`
             SELECT * FROM videos WHERE owner_id = ? AND id NOT IN (
-                SELECT video_id FROM playlist_videos WHERE playlist_id = ?
+                SELECT media_id FROM playlist_items WHERE playlist_id = ? AND media_type = 'video'
             ) ORDER BY original_name ASC
           `).all(req.user.id, playlist.id)
         : db.prepare(`
             SELECT * FROM videos WHERE id NOT IN (
-                SELECT video_id FROM playlist_videos WHERE playlist_id = ?
+                SELECT media_id FROM playlist_items WHERE playlist_id = ? AND media_type = 'video'
+            ) ORDER BY original_name ASC
+          `).all(playlist.id);
+
+    const allImages = isUser
+        ? db.prepare(`
+            SELECT * FROM images WHERE owner_id = ? AND id NOT IN (
+                SELECT media_id FROM playlist_items WHERE playlist_id = ? AND media_type = 'image'
+            ) ORDER BY original_name ASC
+          `).all(req.user.id, playlist.id)
+        : db.prepare(`
+            SELECT * FROM images WHERE id NOT IN (
+                SELECT media_id FROM playlist_items WHERE playlist_id = ? AND media_type = 'image'
             ) ORDER BY original_name ASC
           `).all(playlist.id);
 
     res.render('playlist-detail', {
-        playlist, videos, allVideos,
+        playlist, items, allVideos, allImages,
         message: req.query.msg || null, error: req.query.err || null
     });
 });
 
-// Adicionar vídeo à playlist
-router.post('/:id/videos', (req, res) => {
+// Adicionar item (vídeo ou imagem) à playlist
+router.post('/:id/items', (req, res) => {
     const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(req.params.id);
     if (!playlist) return res.redirect('/playlists?err=Playlist+não+encontrada.');
     if (!isOwnerOrElevated(req, playlist)) return res.redirect(`/playlists/${req.params.id}?err=Sem+permissão.`);
 
-    const { video_id } = req.body;
-    if (!video_id) return res.redirect(`/playlists/${req.params.id}?err=Selecione+um+vídeo.`);
+    const { media_type, media_id } = req.body;
+    if (!['video', 'image'].includes(media_type) || !media_id) {
+        return res.redirect(`/playlists/${req.params.id}?err=Selecione+um+item+válido.`);
+    }
 
-    // Usuário comum só pode adicionar vídeos próprios
-    if (req.user.role === 'user') {
-        const video = db.prepare('SELECT owner_id FROM videos WHERE id = ?').get(video_id);
-        if (!video || video.owner_id !== req.user.id) {
-            return res.redirect(`/playlists/${req.params.id}?err=Sem+permissão+para+adicionar+este+vídeo.`);
-        }
+    const table = media_type === 'video' ? 'videos' : 'images';
+    const media = db.prepare(`SELECT owner_id FROM ${table} WHERE id = ?`).get(media_id);
+    if (!media) return res.redirect(`/playlists/${req.params.id}?err=Item+não+encontrado.`);
+    if (req.user.role === 'user' && media.owner_id !== req.user.id) {
+        return res.redirect(`/playlists/${req.params.id}?err=Sem+permissão+para+adicionar+este+item.`);
     }
 
     const maxPos = db.prepare(`
-        SELECT COALESCE(MAX(position), -1) AS max FROM playlist_videos WHERE playlist_id = ?
+        SELECT COALESCE(MAX(position), -1) AS max FROM playlist_items WHERE playlist_id = ?
     `).get(req.params.id).max;
 
     try {
         db.prepare(`
-            INSERT INTO playlist_videos (playlist_id, video_id, position) VALUES (?, ?, ?)
-        `).run(req.params.id, video_id, maxPos + 1);
+            INSERT INTO playlist_items (playlist_id, media_type, media_id, position) VALUES (?, ?, ?, ?)
+        `).run(req.params.id, media_type, media_id, maxPos + 1);
     } catch {
-        return res.redirect(`/playlists/${req.params.id}?err=Vídeo+já+está+na+playlist.`);
+        return res.redirect(`/playlists/${req.params.id}?err=Item+já+está+na+playlist.`);
     }
 
-    res.redirect(`/playlists/${req.params.id}?msg=Vídeo+adicionado.`);
+    const label = media_type === 'video' ? 'Vídeo' : 'Imagem';
+    res.redirect(`/playlists/${req.params.id}?msg=${encodeURIComponent(label + ' adicionado(a).')}`);
 });
 
-// Remover vídeo da playlist
-router.post('/:id/videos/:videoId/remove', (req, res) => {
+// Remover item da playlist
+router.post('/:id/items/:itemId/remove', (req, res) => {
     const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(req.params.id);
     if (!isOwnerOrElevated(req, playlist)) return res.redirect(`/playlists/${req.params.id}?err=Sem+permissão.`);
 
     db.prepare(`
-        DELETE FROM playlist_videos WHERE playlist_id = ? AND video_id = ?
-    `).run(req.params.id, req.params.videoId);
-    res.redirect(`/playlists/${req.params.id}?msg=Vídeo+removido+da+playlist.`);
+        DELETE FROM playlist_items WHERE id = ? AND playlist_id = ?
+    `).run(req.params.itemId, req.params.id);
+    res.redirect(`/playlists/${req.params.id}?msg=Item+removido+da+playlist.`);
 });
 
-// Mover vídeo na ordem (direção: up | down)
-router.post('/:id/videos/:videoId/move', (req, res) => {
+// Mover item na ordem (direção: up | down)
+router.post('/:id/items/:itemId/move', (req, res) => {
     const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(req.params.id);
     if (!isOwnerOrElevated(req, playlist)) return res.redirect(`/playlists/${req.params.id}?err=Sem+permissão.`);
 
     const playlistId = req.params.id;
-    const videoId    = req.params.videoId;
+    const itemId     = req.params.itemId;
     const direction  = req.body.direction;
 
-    const videos = db.prepare(`
-        SELECT video_id, position FROM playlist_videos
+    const items = db.prepare(`
+        SELECT id, position FROM playlist_items
         WHERE playlist_id = ?
-        ORDER BY position ASC, video_id ASC
+        ORDER BY position ASC, id ASC
     `).all(playlistId);
 
-    const idx = videos.findIndex(v => String(v.video_id) === String(videoId));
+    const idx = items.findIndex(it => String(it.id) === String(itemId));
     if (idx === -1) return res.redirect(`/playlists/${playlistId}`);
 
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= videos.length) return res.redirect(`/playlists/${playlistId}`);
+    if (swapIdx < 0 || swapIdx >= items.length) return res.redirect(`/playlists/${playlistId}`);
 
-    const posA = videos[idx].position;
-    const posB = videos[swapIdx].position;
+    const posA = items[idx].position;
+    const posB = items[swapIdx].position;
 
-    db.prepare('UPDATE playlist_videos SET position = ? WHERE playlist_id = ? AND video_id = ?')
-      .run(posB, playlistId, videoId);
-    db.prepare('UPDATE playlist_videos SET position = ? WHERE playlist_id = ? AND video_id = ?')
-      .run(posA, playlistId, videos[swapIdx].video_id);
+    db.prepare('UPDATE playlist_items SET position = ? WHERE id = ?').run(posB, itemId);
+    db.prepare('UPDATE playlist_items SET position = ? WHERE id = ?').run(posA, items[swapIdx].id);
 
     res.redirect(`/playlists/${playlistId}`);
 });

@@ -16,6 +16,7 @@ const requireAuth = require('./middleware/requireAuth');
 const requireRole = require('./middleware/requireRole');
 const authRoutes = require('./routes/auth');
 const videoRoutes = require('./routes/videos');
+const imageRoutes = require('./routes/images');
 const playlistRoutes = require('./routes/playlists');
 const deviceRoutes = require('./routes/devices');
 const groupRoutes = require('./routes/groups');
@@ -60,6 +61,7 @@ app.use(session({
 
 app.use('/', authRoutes);
 app.use('/videos', requireAuth, videoRoutes);
+app.use('/images', requireAuth, imageRoutes);
 app.use('/playlists', requireAuth, playlistRoutes);
 app.use('/devices', requireAuth, deviceRoutes);
 // Grupos, logs, configurações — apenas master e admin

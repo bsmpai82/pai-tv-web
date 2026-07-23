@@ -25,7 +25,7 @@
         <thead>
             <tr>
                 <th>Nome</th>
-                <th>Vídeos</th>
+                <th>Itens</th>
                 <th>Criada em</th>
                 <th></th>
             </tr>
@@ -34,7 +34,7 @@
         <% playlists.forEach(p => { %>
             <tr>
                 <td><a href="/playlists/<%= p.id %>"><%= p.name %></a></td>
-                <td><%= p.video_count %></td>
+                <td><%= p.item_count %></td>
                 <td><%= new Date(p.created_at).toLocaleString('pt-BR') %></td>
                 <td style="display:flex;gap:8px">
                     <a href="/playlists/<%= p.id %>" class="btn btn-primary btn-sm">Editar</a>

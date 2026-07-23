@@ -75,6 +75,27 @@ const migrations = [
     `ALTER TABLE playlists ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL`,
     `ALTER TABLE users ADD COLUMN password_changed_at DATETIME`,
     `ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0`,
+    `CREATE TABLE IF NOT EXISTS images (
+        id               INTEGER PRIMARY KEY AUTOINCREMENT,
+        filename         TEXT    NOT NULL UNIQUE,
+        original_name    TEXT    NOT NULL,
+        size             INTEGER NOT NULL,
+        duration_seconds INTEGER NOT NULL DEFAULT 10,
+        owner_id         INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS playlist_items (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        playlist_id INTEGER NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+        media_type  TEXT    NOT NULL CHECK(media_type IN ('video','image')),
+        media_id    INTEGER NOT NULL,
+        position    INTEGER NOT NULL DEFAULT 0
+    )`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_playlist_items_unique ON playlist_items(playlist_id, media_type, media_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_playlist_items_playlist ON playlist_items(playlist_id)`,
+    `INSERT INTO playlist_items (playlist_id, media_type, media_id, position)
+     SELECT playlist_id, 'video', video_id, position FROM playlist_videos
+     WHERE NOT EXISTS (SELECT 1 FROM playlist_items)`,
 ];
 for (const sql of migrations) {
     try { db.exec(sql); } catch { /* coluna já existe */ }
