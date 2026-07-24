@@ -24,10 +24,28 @@ data class VideoItem(
 
 data class PlaylistInfo(val id: Int, val name: String)
 
+data class PlaylistItem(
+    val type: String, // "video" | "image"
+    val id: Int,
+    val filename: String,
+    @SerializedName("original_name") val originalName: String,
+    val size: Long,
+    val url: String,
+    @SerializedName("duration_seconds") val durationSeconds: Int? = null,
+)
+
 data class PlaylistResponse(
     val playlist: PlaylistInfo?,
     val videos: List<VideoItem>,
+    val items: List<PlaylistItem>? = null,
 )
+
+/** items[] quando o servidor já suporta imagens; senão reconstrói a partir do videos[] legado. */
+fun PlaylistResponse.resolveItems(): List<PlaylistItem> =
+    items ?: videos.map {
+        PlaylistItem(type = "video", id = it.id, filename = it.filename,
+            originalName = it.originalName, size = it.size, url = it.url, durationSeconds = null)
+    }
 
 private data class RegisterResponse(
     val status: String,
