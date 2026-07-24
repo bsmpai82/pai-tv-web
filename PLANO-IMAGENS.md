@@ -71,7 +71,7 @@ Arquitetura atual (polling 5 min, cache local, hash de playlist) permanece intac
   - [x] Tela cheia sem afetar vídeo (resize dinâmico, validado visualmente).
   - [x] Boot com cache local (reinício do app volta a tocar do cache sem esperar rede).
   - [x] Resync de duração — validado indiretamente via servidor: mudar `duration_seconds` muda o `playlist_hash` (`md5(filename:duration)`), testado com curl real contra homolog.
-  - [ ] *Opcional, não crítico*: imagem corrompida forçada (deve pular) — lógica de skip é código pré-existente inalterado, já validado pra vídeo; risco baixo de regressão específica de imagem. Não repetido por ser trabalhoso de simular remotamente.
+  - [x] Imagem corrompida (deve pular) — corrompida via `adb shell run-as` (mesmo tamanho em bytes, pra não disparar redownload automático), app reiniciado, sem crash e o ciclo completou rápido (item pulado quase instantaneamente em vez de travar pelos 5s configurados — confirmado pelo timestamp de recriação do codec de vídeo no logcat, e visualmente pelo usuário). Cache restaurado depois (arquivo removido + `force_sync=1` pra rebaixar a imagem real).
   - [ ] *Opcional, não crítico*: APK antigo de verdade contra servidor novo — já coberto pela validação do formato do array `videos` legado via curl; não repetido por falta de um APK antigo instalado à mão.
 - [ ] **Produção** (após aprovação explícita): primeiro o servidor (retrocompatível), depois os APKs prod nos sticks. **Não iniciar sem sinal claro do usuário.**
 - [x] Atualizar `CLAUDE.md` (tabelas do banco, seção de status).
