@@ -103,6 +103,12 @@ Tabelas previstas:
 - `videos` — id, nome, caminho, tamanho, grupo, criado_em
 - `assignments` — id, video_id, device_id, baixado, criado_em
 
+Tabelas adicionadas depois (ver `server/db/database.js`, array `migrations`), suporte a playlists mistas
+vídeo+imagem (ver `PLANO-IMAGENS.md`):
+- `images` — id, filename, original_name, size, duration_seconds (tempo de exibição), owner_id, created_at
+- `playlist_items` — id, playlist_id, media_type ('video'|'image'), media_id, position — substitui `playlist_videos`
+  como fonte de verdade de playlist (tabela antiga fica congelada, só histórico)
+
 ---
 
 ## Ambientes de desenvolvimento
@@ -184,6 +190,7 @@ pm2 restart all              # Reinicia o servidor
 - [x] Correções de segurança: cookie `sameSite=lax` + `httpOnly`, XSS em handlers inline removido
 - [x] Autostart do app (modo kiosk) validado no IZY Play Intelbras — ver seção "Provisionar novo stick"
 - [x] Distribuição remota do APK via `paitv.com.br/apk/<token>` — ver seção "Distribuição do APK (instalação remota)"
+- [x] **Playlists mistas (vídeo + imagem)** (2026-07-23, homolog) — painel de imagens (`/images`), duração configurável por imagem, playlist mista via `playlist_items`, app Android com `MediaItem`/`setImageDurationMs` (Media3 ≥ 1.4.1 — 1.3.x não desenha imagem no `PlayerView`, só decodifica). Validado no stick Intelbras de homolog. Detalhes e pendências em `PLANO-IMAGENS.md`. Produção ainda não recebeu essa mudança — exige aprovação explícita.
 
 ### Pendente
 - [ ] ffmpeg instalado no VPS (`apt-get install -y ffmpeg`) — thumbnails de vídeo não funcionam sem ele
