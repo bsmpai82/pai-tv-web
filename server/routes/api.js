@@ -58,19 +58,23 @@ router.get('/device/:uuid/check', requireDeviceToken, (req, res) => {
         effectivePlaylistId = group?.playlist_id || null;
     }
 
-    // Calcula hash da playlist atual
+    // Calcula hash da playlist atual (inclui duração — mudar a duração de uma imagem já dispara re-sync)
     let playlistHash = 'empty';
     if (effectivePlaylistId) {
-        const videos = db.prepare(`
-            SELECT v.filename FROM videos v
-            JOIN playlist_videos pv ON pv.video_id = v.id
-            WHERE pv.playlist_id = ?
-            ORDER BY pv.position ASC, v.id ASC
+        const items = db.prepare(`
+            SELECT
+                CASE WHEN pi.media_type = 'video' THEN v.filename ELSE im.filename END AS filename,
+                CASE WHEN pi.media_type = 'image' THEN im.duration_seconds ELSE NULL END AS duration_seconds
+            FROM playlist_items pi
+            LEFT JOIN videos v ON pi.media_type = 'video' AND pi.media_id = v.id
+            LEFT JOIN images im ON pi.media_type = 'image' AND pi.media_id = im.id
+            WHERE pi.playlist_id = ?
+            ORDER BY pi.position ASC, pi.id ASC
         `).all(effectivePlaylistId);
 
         playlistHash = crypto
             .createHash('md5')
-            .update(videos.map(v => v.filename).join(','))
+            .update(items.map(it => `${it.filename}:${it.duration_seconds ?? ''}`).join(','))
             .digest('hex');
     }
 
@@ -98,24 +102,35 @@ router.get('/device/:uuid/playlist', requireDeviceToken, (req, res) => {
     }
 
     const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(effectivePid);
-    const videos = db.prepare(`
-        SELECT v.id, v.filename, v.original_name, v.size
-        FROM videos v
-        JOIN playlist_videos pv ON pv.video_id = v.id
-        WHERE pv.playlist_id = ?
-        ORDER BY pv.position ASC, v.id ASC
+    const rawItems = db.prepare(`
+        SELECT pi.media_type AS type,
+               CASE WHEN pi.media_type = 'video' THEN v.id ELSE im.id END AS id,
+               CASE WHEN pi.media_type = 'video' THEN v.filename ELSE im.filename END AS filename,
+               CASE WHEN pi.media_type = 'video' THEN v.original_name ELSE im.original_name END AS original_name,
+               CASE WHEN pi.media_type = 'video' THEN v.size ELSE im.size END AS size,
+               CASE WHEN pi.media_type = 'image' THEN im.duration_seconds ELSE NULL END AS duration_seconds
+        FROM playlist_items pi
+        LEFT JOIN videos v ON pi.media_type = 'video' AND pi.media_id = v.id
+        LEFT JOIN images im ON pi.media_type = 'image' AND pi.media_id = im.id
+        WHERE pi.playlist_id = ?
+        ORDER BY pi.position ASC, pi.id ASC
     `).all(effectivePid);
 
     // Zera o flag force_sync após entregar a playlist
     db.prepare('UPDATE devices SET force_sync = 0 WHERE id = ?').run(device.id);
 
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const videosWithUrl = videos.map(v => ({
-        ...v,
-        url: `${baseUrl}/media/${v.filename}`,
+    const items = rawItems.map(it => ({
+        ...it,
+        url: `${baseUrl}/media/${it.filename}`,
     }));
 
-    res.json({ playlist: { id: playlist.id, name: playlist.name }, videos: videosWithUrl });
+    // Array legado (só vídeos) para compatibilidade com APKs antigos
+    const videos = items
+        .filter(it => it.type === 'video')
+        .map(({ id, filename, original_name, size, url }) => ({ id, filename, original_name, size, url }));
+
+    res.json({ playlist: { id: playlist.id, name: playlist.name }, items, videos });
 });
 
 module.exports = router;

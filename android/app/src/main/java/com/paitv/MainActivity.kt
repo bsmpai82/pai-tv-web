@@ -15,8 +15,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.paitv.databinding.ActivityMainBinding
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,12 +31,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prefs: DevicePrefs
     private lateinit var videoManager: VideoManager
     private var player: ExoPlayer? = null
-    private var currentFilenames: List<String> = emptyList()
+    private var currentItems: List<PlaylistItem> = emptyList()
+
+    private val gson = Gson()
+    private val itemsListType = object : TypeToken<List<PlaylistItem>>() {}.type
 
     private val playlistReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val filenames = intent.getStringArrayListExtra("filenames") ?: return
-            loadPlayer(filenames)
+            val json = intent.getStringExtra(SyncService.EXTRA_ITEMS_JSON) ?: return
+            val items: List<PlaylistItem> = runCatching {
+                gson.fromJson<List<PlaylistItem>>(json, itemsListType)
+            }.getOrNull() ?: return
+            loadPlayer(items)
         }
     }
 
@@ -52,10 +60,10 @@ class MainActivity : AppCompatActivity() {
         // Inicia o serviço de sincronização
         startForegroundService(Intent(this, SyncService::class.java))
 
-        // Carrega vídeos em cache (se houver)
-        val cached = videoManager.cachedFiles(prefs.cachedFilenames.toList())
-        if (cached.isNotEmpty()) {
-            loadPlayer(prefs.cachedFilenames.toList())
+        // Carrega itens em cache (se houver)
+        val cachedItems = prefs.cachedItems
+        if (cachedItems.isNotEmpty()) {
+            loadPlayer(cachedItems)
         } else {
             showWaiting()
         }
@@ -85,15 +93,23 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun loadPlayer(filenames: List<String>) {
-        if (filenames.isEmpty()) { showWaiting(); return }
+    /** Imagem preenche a tela (crop central); vídeo mantém a proporção original (como hoje). */
+    private fun resizeModeFor(item: PlaylistItem?): Int =
+        if (item?.type == "image") AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        else AspectRatioFrameLayout.RESIZE_MODE_FIT
 
-        val files = videoManager.cachedFiles(filenames)
-        if (files.isEmpty()) { showWaiting(); return }
+    private fun loadPlayer(items: List<PlaylistItem>) {
+        if (items.isEmpty()) { showWaiting(); return }
+
+        val pairs = items.mapNotNull { item ->
+            val file = videoManager.localFile(item.filename)
+            if (file.exists()) item to file else null
+        }
+        if (pairs.isEmpty()) { showWaiting(); return }
 
         // Salva lista em prefs para próxima abertura do app
-        currentFilenames = filenames
-        prefs.cachedFilenames = filenames.toSet()
+        currentItems = pairs.map { it.first }
+        prefs.cachedItems = currentItems
 
         binding.waitingLayout.isVisible = false
         binding.playerView.isVisible = true
@@ -102,9 +118,19 @@ class MainActivity : AppCompatActivity() {
         player = ExoPlayer.Builder(this).build().also { exo ->
             binding.playerView.player = exo
             binding.playerView.useController = false
+            binding.playerView.resizeMode = resizeModeFor(pairs.firstOrNull()?.first)
 
-            val items = files.map { MediaItem.fromUri(Uri.fromFile(it)) }
-            exo.setMediaItems(items)
+            val mediaItems = pairs.map { (item, file) ->
+                if (item.type == "image") {
+                    MediaItem.Builder()
+                        .setUri(Uri.fromFile(file))
+                        .setImageDurationMs((item.durationSeconds ?: 10).toLong() * 1000L)
+                        .build()
+                } else {
+                    MediaItem.fromUri(Uri.fromFile(file))
+                }
+            }
+            exo.setMediaItems(mediaItems)
             exo.repeatMode = Player.REPEAT_MODE_ALL
             exo.playWhenReady = true
             exo.prepare()
@@ -112,12 +138,14 @@ class MainActivity : AppCompatActivity() {
             exo.addListener(object : Player.Listener {
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                     val index = exo.currentMediaItemIndex
-                    prefs.currentVideo = if (index < filenames.size) filenames[index] else null
+                    val current = if (index < currentItems.size) currentItems[index] else null
+                    prefs.currentVideo = current?.filename
+                    binding.playerView.resizeMode = resizeModeFor(current)
                 }
 
                 override fun onPlayerError(error: PlaybackException) {
                     val index = exo.currentMediaItemIndex
-                    val filename = if (index < currentFilenames.size) currentFilenames[index] else "desconhecido"
+                    val filename = if (index < currentItems.size) currentItems[index].filename else "desconhecido"
                     Log.e(TAG, "Erro ao reproduzir '$filename': ${error.message}", error)
 
                     if (exo.mediaItemCount > 1) {
@@ -127,8 +155,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             })
-            // Salva o primeiro vídeo imediatamente
-            prefs.currentVideo = filenames.firstOrNull()
+            // Salva o primeiro item imediatamente
+            prefs.currentVideo = currentItems.firstOrNull()?.filename
         }
     }
 

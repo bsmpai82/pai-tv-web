@@ -11,8 +11,8 @@ android {
         applicationId = "com.paitv"
         minSdk = 25
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     buildFeatures {
@@ -55,9 +55,11 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
 
-    // ExoPlayer / Media3
-    implementation("androidx.media3:media3-exoplayer:1.3.1")
-    implementation("androidx.media3:media3-ui:1.3.1")
+    // ExoPlayer / Media3 — 1.4.0+ necessário: PlayerView só ganhou suporte
+    // de exibição de imagem (ImageOutput) nessa versão; no 1.3.x o ImageRenderer
+    // decodifica a imagem (timing correto) mas a PlayerView nunca desenha o bitmap.
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
 
     // HTTP
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

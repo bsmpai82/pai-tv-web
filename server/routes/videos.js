@@ -69,16 +69,16 @@ const upload = multer({
 router.get('/', (req, res) => {
     const isUser = req.user.role === 'user';
     const query = isUser
-        ? `SELECT v.*, u.username AS owner_name, COUNT(pv.playlist_id) AS playlist_count
+        ? `SELECT v.*, u.username AS owner_name, COUNT(pi.id) AS playlist_count
            FROM videos v
-           LEFT JOIN playlist_videos pv ON pv.video_id = v.id
+           LEFT JOIN playlist_items pi ON pi.media_type = 'video' AND pi.media_id = v.id
            LEFT JOIN users u ON u.id = v.owner_id
            WHERE v.owner_id = ?
            GROUP BY v.id
            ORDER BY v.created_at DESC`
-        : `SELECT v.*, u.username AS owner_name, COUNT(pv.playlist_id) AS playlist_count
+        : `SELECT v.*, u.username AS owner_name, COUNT(pi.id) AS playlist_count
            FROM videos v
-           LEFT JOIN playlist_videos pv ON pv.video_id = v.id
+           LEFT JOIN playlist_items pi ON pi.media_type = 'video' AND pi.media_id = v.id
            LEFT JOIN users u ON u.id = v.owner_id
            GROUP BY v.id
            ORDER BY v.created_at DESC`;
@@ -146,6 +146,7 @@ router.post('/:id/delete', (req, res) => {
         try { fs.unlinkSync(thumbPath); } catch { /* já removido */ }
     }
 
+    db.prepare(`DELETE FROM playlist_items WHERE media_type = 'video' AND media_id = ?`).run(video.id);
     db.prepare('DELETE FROM videos WHERE id = ?').run(video.id);
     res.redirect('/videos?msg=Vídeo+removido.');
 });

@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.google.gson.Gson
 import kotlinx.coroutines.*
 
 class SyncService : Service() {
@@ -19,6 +20,7 @@ class SyncService : Service() {
         const val CHECK_INTERVAL_MS = 5 * 60 * 1000L // 5 minutos
         const val WATCHDOG_INTERVAL_MS = 60 * 1000L  // 1 minuto
         const val ACTION_PLAYLIST_UPDATED = "com.paitv.PLAYLIST_UPDATED"
+        const val EXTRA_ITEMS_JSON = "items_json"
         const val EXTRA_LAUNCH_UI = "launch_ui"
         // Atraso para dar tempo do sistema terminar o boot antes de lançar
         // a activity. Sem isso, alguns OEMs (Intelbras, Xiaomi) descartam
@@ -27,6 +29,7 @@ class SyncService : Service() {
     }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val gson = Gson()
     private lateinit var prefs: DevicePrefs
     private lateinit var api: ApiClient
     private lateinit var videoManager: VideoManager
@@ -91,27 +94,27 @@ class SyncService : Service() {
         Log.i("SyncService", "Sincronizando playlist (force=${check.forceSync})")
 
         val playlistResp = api.getPlaylist(uuid) ?: return
-        val videos = playlistResp.videos
+        val items = playlistResp.resolveItems()
 
-        val changed = videoManager.sync(videos, api)
+        val changed = videoManager.sync(items, api)
 
-        // Só salva o hash se todos os vídeos foram baixados com sucesso
-        val allCached = videos.all { videoManager.isCached(it.filename) }
+        // Só salva o hash se todos os itens foram baixados com sucesso
+        val allCached = items.all { videoManager.isCached(it.filename) }
         if (allCached) {
             prefs.lastPlaylistHash = check.playlistHash
         } else {
-            Log.w("SyncService", "Nem todos os vídeos foram baixados. Hash não salvo — tentará novamente.")
+            Log.w("SyncService", "Nem todos os itens foram baixados. Hash não salvo — tentará novamente.")
         }
 
-        // Envia apenas os filenames que estão em cache para o player
-        val cachedFilenames = videos.map { it.filename }.filter { videoManager.isCached(it) }
+        // Envia apenas os itens que estão em cache para o player
+        val cachedItems = items.filter { videoManager.isCached(it.filename) }
 
-        if ((changed || check.forceSync) && cachedFilenames.isNotEmpty()) {
+        if ((changed || check.forceSync) && cachedItems.isNotEmpty()) {
             sendBroadcast(Intent(ACTION_PLAYLIST_UPDATED).apply {
                 `package` = packageName
-                putStringArrayListExtra("filenames", ArrayList(cachedFilenames))
+                putExtra(EXTRA_ITEMS_JSON, gson.toJson(cachedItems))
             })
-            Log.i("SyncService", "Sync concluído. ${cachedFilenames.size}/${videos.size} vídeo(s) em cache.")
+            Log.i("SyncService", "Sync concluído. ${cachedItems.size}/${items.size} item(ns) em cache.")
         }
     }
 

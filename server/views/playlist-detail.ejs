@@ -11,14 +11,37 @@
     <% if (allVideos.length === 0) { %>
         <p style="color:#888">Todos os vídeos já estão nesta playlist.</p>
     <% } else { %>
-    <form action="/playlists/<%= playlist.id %>/videos" method="POST"
+    <form action="/playlists/<%= playlist.id %>/items" method="POST"
           style="display:flex;gap:12px;align-items:flex-end">
+        <input type="hidden" name="media_type" value="video">
         <div class="form-row" style="margin:0;flex:1">
             <label>Vídeo</label>
-            <select name="video_id" required>
+            <select name="media_id" required>
                 <option value="">Selecione...</option>
                 <% allVideos.forEach(v => { %>
                     <option value="<%= v.id %>"><%= v.original_name %></option>
+                <% }) %>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar</button>
+    </form>
+    <% } %>
+</div>
+
+<div class="box">
+    <h2>Adicionar imagem</h2>
+    <% if (allImages.length === 0) { %>
+        <p style="color:#888">Todas as imagens já estão nesta playlist.</p>
+    <% } else { %>
+    <form action="/playlists/<%= playlist.id %>/items" method="POST"
+          style="display:flex;gap:12px;align-items:flex-end">
+        <input type="hidden" name="media_type" value="image">
+        <div class="form-row" style="margin:0;flex:1">
+            <label>Imagem</label>
+            <select name="media_id" required>
+                <option value="">Selecione...</option>
+                <% allImages.forEach(im => { %>
+                    <option value="<%= im.id %>"><%= im.original_name %></option>
                 <% }) %>
             </select>
         </div>
@@ -37,36 +60,40 @@
 </div>
 
 <div class="box">
-    <h2>Vídeos na playlist (<%= videos.length %>)</h2>
-    <% if (videos.length === 0) { %>
-        <p style="color:#888">Nenhum vídeo nesta playlist.</p>
+    <h2>Itens na playlist (<%= items.length %>)</h2>
+    <% if (items.length === 0) { %>
+        <p style="color:#888">Nenhum item nesta playlist.</p>
     <% } else { %>
     <table>
         <thead>
             <tr>
                 <th>#</th>
+                <th>Tipo</th>
                 <th>Nome</th>
                 <th>Tamanho</th>
+                <th>Duração</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-        <% videos.forEach((v, i) => { %>
+        <% items.forEach((it, i) => { %>
             <tr>
                 <td style="text-align:center;width:30px"><%= i + 1 %></td>
-                <td><%= v.original_name %></td>
-                <td><%= (v.size / 1024 / 1024).toFixed(1) %> MB</td>
+                <td><span class="role-badge"><%= it.media_type === 'video' ? 'Vídeo' : 'Imagem' %></span></td>
+                <td><%= it.original_name %></td>
+                <td><%= (it.size / 1024 / 1024).toFixed(1) %> MB</td>
+                <td><%= it.media_type === 'image' ? it.duration_seconds + 's' : '—' %></td>
                 <td>
                     <div style="display:flex;gap:4px">
-                        <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/move" method="POST">
+                        <form action="/playlists/<%= playlist.id %>/items/<%= it.item_id %>/move" method="POST">
                             <input type="hidden" name="direction" value="up">
                             <button type="submit" class="btn btn-primary btn-sm" <%= i === 0 ? 'disabled' : '' %>>▲</button>
                         </form>
-                        <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/move" method="POST">
+                        <form action="/playlists/<%= playlist.id %>/items/<%= it.item_id %>/move" method="POST">
                             <input type="hidden" name="direction" value="down">
-                            <button type="submit" class="btn btn-primary btn-sm" <%= i === videos.length - 1 ? 'disabled' : '' %>>▼</button>
+                            <button type="submit" class="btn btn-primary btn-sm" <%= i === items.length - 1 ? 'disabled' : '' %>>▼</button>
                         </form>
-                        <form action="/playlists/<%= playlist.id %>/videos/<%= v.id %>/remove" method="POST">
+                        <form action="/playlists/<%= playlist.id %>/items/<%= it.item_id %>/remove" method="POST">
                             <button type="submit" class="btn btn-danger btn-sm">Remover</button>
                         </form>
                     </div>

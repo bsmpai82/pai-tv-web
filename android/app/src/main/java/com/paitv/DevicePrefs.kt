@@ -1,11 +1,15 @@
 package com.paitv
 
 import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.util.UUID
 
 class DevicePrefs(context: Context) {
 
     private val prefs = context.getSharedPreferences("pai_tv", Context.MODE_PRIVATE)
+    private val gson = Gson()
+    private val cachedItemsType = object : TypeToken<List<PlaylistItem>>() {}.type
 
     /** UUID único e persistente do dispositivo. Gerado na primeira execução. */
     val deviceUuid: String
@@ -18,10 +22,12 @@ class DevicePrefs(context: Context) {
         get() = prefs.getString("playlist_hash", null)
         set(value) = prefs.edit().putString("playlist_hash", value).apply()
 
-    /** Lista de filenames atualmente em cache (JSON array simples). */
-    var cachedFilenames: Set<String>
-        get() = prefs.getStringSet("cached_files", emptySet()) ?: emptySet()
-        set(value) = prefs.edit().putStringSet("cached_files", value).apply()
+    /** Itens (vídeo/imagem) atualmente em cache, na ordem de reprodução. */
+    var cachedItems: List<PlaylistItem>
+        get() = prefs.getString("cached_items", null)?.let {
+            runCatching { gson.fromJson<List<PlaylistItem>>(it, cachedItemsType) }.getOrNull()
+        } ?: emptyList()
+        set(value) = prefs.edit().putString("cached_items", gson.toJson(value)).apply()
 
     /** Token de autenticação recebido do servidor no registro. */
     var deviceToken: String?

@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- Player de vídeo (fullscreen) -->
+    <!-- Player de vídeo/imagem (fullscreen). texture_view em vez do surface_view padrão:
+         SurfaceView usa um overlay de hardware separado que fica por cima da imagem
+         (renderizada como view normal), deixando a tela preta ao exibir imagens. -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:focusable="false"
-        android:focusableInTouchMode="false" />
+        android:focusableInTouchMode="false"
+        app:surface_type="texture_view" />
 
     <!-- Tela de espera (sem playlist configurada) -->
     <LinearLayout
