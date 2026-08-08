@@ -22,9 +22,36 @@ else
 fi
 
 # 2. Copia o Caddyfile
+# ATENÇÃO: este arquivo só tem os blocos do PAI TV (paitv.com.br + homolog.paitv.com.br).
+# Outros sites da VPS (ex.: sgi.paitv.com.br, quiz.paitv.com.br) têm blocos adicionados
+# manualmente direto em /etc/caddy/Caddyfile e NÃO existem aqui no repo — um `cp` sem
+# checagem os apaga (incidente real em 2026-08-07: rodar este script derrubou sgi e quiz).
 echo "[2/4] Configurando Caddyfile..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cp "$SCRIPT_DIR/Caddyfile" /etc/caddy/Caddyfile
+DEST=/etc/caddy/Caddyfile
+
+if [ ! -f "$DEST" ]; then
+    echo "Nenhum Caddyfile existente — copiando pela primeira vez."
+    cp "$SCRIPT_DIR/Caddyfile" "$DEST"
+elif diff -q "$SCRIPT_DIR/Caddyfile" "$DEST" >/dev/null; then
+    echo "Caddyfile da VPS já é igual ao do repo — nada a fazer."
+elif [ "$1" = "--force" ]; then
+    BACKUP="$DEST.bak-$(date +%F-%H%M%S)"
+    cp "$DEST" "$BACKUP"
+    echo "--force informado: sobrescrevendo mesmo assim. Backup salvo em $BACKUP."
+    cp "$SCRIPT_DIR/Caddyfile" "$DEST"
+else
+    echo ""
+    echo "!!! O Caddyfile da VPS é DIFERENTE do deste repo e provavelmente tem blocos"
+    echo "!!! de outros sites (sgi, quiz, etc.) que seriam apagados. Abortando sem mexer."
+    echo ""
+    echo "Diferenças ($DEST vs $SCRIPT_DIR/Caddyfile):"
+    diff "$DEST" "$SCRIPT_DIR/Caddyfile" || true
+    echo ""
+    echo "Se tiver certeza que quer sobrescrever mesmo assim (um backup automático será"
+    echo "criado antes), rode: bash $0 --force"
+    exit 1
+fi
 
 # 3. Abre portas no firewall
 echo "[3/4] Configurando firewall (ufw)..."
