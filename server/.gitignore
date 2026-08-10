@@ -2,3 +2,9 @@ node_modules/
 .env
 uploads/
 *.db
+# arquivos auxiliares do SQLite - a regra *.db acima nao pega estes sufixos
+*.db-wal
+*.db-shm
+*.db-journal
+# copias manuais do banco (ex: pai_tv.db.bak-20260514)
+*.db.bak*
