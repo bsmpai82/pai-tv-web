@@ -1,20 +1,46 @@
 const express = require('express');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const db = require('../db/database');
 const requireDeviceToken = require('../middleware/requireDeviceToken');
 const { log } = require('../services/logger');
 
 const router = express.Router();
 
+// O registro é anônimo — sem limite, qualquer um enche o banco de cadastros falsos.
+// Só nesta rota: os endpoints de polling são chamados pelos sticks a cada 5 min.
+// Limite generoso porque os sticks de um mesmo local saem todos pelo mesmo IP (NAT),
+// e reprovisionar um site inteiro dispara ~12 registros seguidos daquele IP.
+const registerLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // Registrar dispositivo — retorna token de autenticação
 // POST /api/device/register  { device_uuid }
-router.post('/device/register', (req, res) => {
+router.post('/device/register', registerLimiter, (req, res) => {
     const { device_uuid } = req.body;
     if (!device_uuid) return res.status(400).json({ error: 'device_uuid obrigatório.' });
 
+    const uuidCurto = device_uuid.slice(0, 8);
     const existing = db.prepare('SELECT * FROM devices WHERE device_uuid = ?').get(device_uuid);
     if (existing) {
-        return res.json({ status: 'already_registered', device_id: existing.id, token: existing.token });
+        // Registro interrompido: o dispositivo foi criado mas a resposta se perdeu antes de
+        // ele guardar o token, então nunca chegou a se comunicar. É o único caso em que
+        // reemitir é seguro — e sai um token novo, não o antigo.
+        if (!existing.last_seen) {
+            const novoToken = crypto.randomUUID();
+            db.prepare('UPDATE devices SET token = ? WHERE id = ?').run(novoToken, existing.id);
+            log('dispositivo', `Token reemitido — registro anterior não chegou a se comunicar (UUID: ${uuidCurto}...)`, 'alerta', existing.id);
+            return res.json({ status: 'already_registered', device_id: existing.id, token: novoToken });
+        }
+
+        // Dispositivo em serviço: nunca devolve o token. Quem descobrir o UUID de um stick
+        // não pode se apropriar da credencial dele.
+        log('dispositivo', `Tentativa de re-registro de dispositivo em serviço (UUID: ${uuidCurto}...)`, 'alerta', existing.id);
+        return res.json({ status: 'already_registered', device_id: existing.id });
     }
 
     const token = crypto.randomUUID();
@@ -22,7 +48,7 @@ router.post('/device/register', (req, res) => {
         INSERT INTO devices (device_uuid, token) VALUES (?, ?)
     `).run(device_uuid, token);
 
-    log('dispositivo', `Novo dispositivo registrado (UUID: ${device_uuid.slice(0, 8)}...)`, 'info', result.lastInsertRowid);
+    log('dispositivo', `Novo dispositivo registrado (UUID: ${uuidCurto}...)`, 'info', result.lastInsertRowid);
     res.status(201).json({ status: 'registered', device_id: result.lastInsertRowid, token });
 });
 
