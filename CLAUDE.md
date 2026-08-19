@@ -113,13 +113,16 @@ vídeo+imagem (ver `PLANO-IMAGENS.md`):
 
 ## Ambientes de desenvolvimento
 
-| | Desktop Windows (casa) | Desktop Linux (trabalho) |
-|---|---|---|
-| **Usuário** | Dimozi | pai-tv |
-| **Projeto** | `D:\DEV\pai-tv-web` | `/home/pai-tv/pai-tv-web` |
-| **Uso principal** | Desenvolvimento, build do APK | Provisionar sticks via ADB |
-| **Android SDK** | `C:\Users\Dimozi\AppData\Local\Android\Sdk` | `/home/pai-tv/Android/Sdk` |
-| **ADB** | `platform-tools\adb.exe` | `adb` (no PATH) |
+| | Desktop Windows (casa) | Desktop Linux (trabalho) | Desktop Linux (instalador) |
+|---|---|---|---|
+| **Usuário** | Dimozi | pai-tv | — |
+| **Projeto** | `D:\DEV\pai-tv-web` | `/home/pai-tv/pai-tv-web` | `~/pai-tv-web` |
+| **Uso principal** | Desenvolvimento, build do APK | Provisionar sticks via ADB | Instalar APK + kiosk nos sticks |
+| **Android SDK** | `C:\Users\Dimozi\AppData\Local\Android\Sdk` | `/home/pai-tv/Android/Sdk` | não instalado (só `adb`) |
+| **ADB** | `platform-tools\adb.exe` | `adb` (no PATH) | `adb` via apt (no PATH) |
+
+A máquina "instalador" não compila nada — baixa o APK pronto de `paitv.com.br/apk/<token>`.
+Runbook de preparação: [deploy/SETUP-DESKTOP-INSTALADOR.md](deploy/SETUP-DESKTOP-INSTALADOR.md).
 
 ---
 
@@ -262,6 +265,9 @@ adb install $APK
 ## Provisionar novo stick (modo kiosk com autostart)
 
 Runbook validado no **IZY Play Intelbras** (2026-07-03, homolog) e **Fire TV Stick Amazon** (2026-06-04).
+
+> Vai usar uma máquina Linux nova só para instalar (sem compilar)? Prepare-a primeiro com
+> [deploy/SETUP-DESKTOP-INSTALADOR.md](deploy/SETUP-DESKTOP-INSTALADOR.md) — só `adb` + `git`, APK baixado do painel.
 
 ### Estratégia por dispositivo
 
