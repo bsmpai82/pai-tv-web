@@ -62,6 +62,31 @@ para ter o `deploy/kiosk-intelbras.sh`.
 
 ---
 
+## 2.1 App gráfico "PAI TV Instalador" (recomendado para o dia a dia)
+
+Uma janela onde qualquer pessoa digita o IP do stick e clica em **Reiniciar**, **Atualizar app**
+ou **Instalar do zero** (instala + kiosk, detecta sozinho se é Intelbras/Google TV ou Fire TV).
+O APK é sempre baixado do painel; só baixa de novo quando há versão nova.
+
+```bash
+bash ~/pai-tv-web/deploy/instalador/instalar.sh
+```
+
+O script instala `python3-tk` + `adb`, pede o link do APK (`paitv.com.br/settings` → card
+**"Distribuição do APK"**) e cria o atalho no menu e na área de trabalho. Se o ícone da área de
+trabalho não abrir: botão direito → **Permitir execução**.
+
+- Link guardado em `~/.config/paitv-instalador/config.json` — o operador não precisa vê-lo.
+  Token rotacionado? Botão **Configurar link do APK** na janela, ou rode o `instalar.sh` de novo.
+- **Atualizar app** usa `adb install -r`: mantém o cadastro do dispositivo e o kiosk.
+- O primeiro Conectar numa máquina nova mostra na TV o prompt "Permitir depuração" — aceite
+  com "Sempre permitir".
+- Atualizar o próprio app: `cd ~/pai-tv-web && git pull`.
+
+As seções abaixo continuam valendo como caminho manual (e para diagnosticar quando o app falhar).
+
+---
+
 ## 3. Baixar o APK (sem compilar)
 
 O APK de produção fica hospedado no próprio painel. Pegue o link em

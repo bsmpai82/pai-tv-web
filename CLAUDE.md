@@ -123,6 +123,8 @@ vídeo+imagem (ver `PLANO-IMAGENS.md`):
 
 A máquina "instalador" não compila nada — baixa o APK pronto de `paitv.com.br/apk/<token>`.
 Runbook de preparação: [deploy/SETUP-DESKTOP-INSTALADOR.md](deploy/SETUP-DESKTOP-INSTALADOR.md).
+Nela roda o app gráfico [deploy/instalador/paitv-instalador.py](deploy/instalador/paitv-instalador.py)
+(Tkinter: IP → Reiniciar / Atualizar app / Instalar do zero), preparado por `deploy/instalador/instalar.sh`.
 
 ---
 
