@@ -1,9 +1,11 @@
 #!/bin/bash
 # Setup do backup diário do banco de produção do PAI TV
-# Rodar no VPS como root: bash /root/pai-tv-web/deploy/setup-backup.sh
+# Rodar no VPS como root: bash /srv/paitv/prod/deploy/setup-backup.sh
+# O cron roda como paitv (dono do banco): um .backup feito por root sobre o banco em WAL pode
+# criar -wal/-shm com dono root, e o app (que roda como paitv) perderia a escrita.
 set -e
 
-DB_PATH="/root/pai-tv-web/server/db/pai_tv.db"
+DB_PATH="/srv/paitv/prod/server/db/pai_tv.db"
 BACKUP_DIR="/srv/pai_tv/backups"
 CRON_FILE="/etc/cron.d/paitv-backup"
 
@@ -17,12 +19,12 @@ else
 fi
 
 echo "==> [2/3] Criando diretório de backups..."
-mkdir -p "$BACKUP_DIR"
+install -d -o paitv -g paitv "$BACKUP_DIR"
 
 echo "==> [3/3] Configurando cron diário..."
 cat > "$CRON_FILE" <<EOF
 # Backup diário do banco de produção do PAI TV (.backup do sqlite, seguro com WAL)
-45 3 * * * root sqlite3 $DB_PATH ".backup '$BACKUP_DIR/pai_tv-\$(date +\%F).db'" && gzip -f "$BACKUP_DIR/pai_tv-\$(date +\%F).db" && find $BACKUP_DIR -name 'pai_tv-*.db.gz' -mtime +7 -delete
+45 3 * * * paitv sqlite3 $DB_PATH ".backup '$BACKUP_DIR/pai_tv-\$(date +\%F).db'" && gzip -f "$BACKUP_DIR/pai_tv-\$(date +\%F).db" && find $BACKUP_DIR -name 'pai_tv-*.db.gz' -mtime +7 -delete
 EOF
 chmod 644 "$CRON_FILE"
 
