@@ -51,9 +51,28 @@ else
 fi
 pm2 save
 
-echo "==> [6/6] Recarregando Caddyfile..."
-cp "$DIR/deploy/Caddyfile" /etc/caddy/Caddyfile
-caddy reload --config /etc/caddy/Caddyfile
+echo "==> [6/6] Conferindo o Caddyfile..."
+# ATENCAO: deploy/Caddyfile so tem os blocos do PAI TV. Os blocos de sgi.paitv.com.br e
+# quiz.paitv.com.br vivem apenas em /etc/caddy/Caddyfile. Copiar por cima derruba os dois
+# (incidente de 2026-08-07 com o setup-caddy.sh; mesma protecao aplicada aqui).
+DEST=/etc/caddy/Caddyfile
+SRC="$DIR/deploy/Caddyfile"
+if [ ! -f "$DEST" ]; then
+  echo "    Nenhum Caddyfile existente - copiando pela primeira vez."
+  cp "$SRC" "$DEST"
+  caddy reload --config "$DEST"
+elif diff -q "$SRC" "$DEST" >/dev/null; then
+  echo "    Caddyfile da VPS ja e igual ao do repo - nada a fazer."
+elif [ "$1" = "--force" ]; then
+  BACKUP="$DEST.bak-$(date +%F-%H%M%S)"
+  cp "$DEST" "$BACKUP"
+  echo "    --force informado: sobrescrevendo. Backup em $BACKUP."
+  cp "$SRC" "$DEST"
+  caddy reload --config "$DEST"
+else
+  echo "    !!! O Caddyfile da VPS e DIFERENTE do repo (provavelmente tem sgi/quiz). NAO foi alterado."
+  echo "    Para sobrescrever mesmo assim (com backup automatico): bash $0 --force"
+fi
 
 echo ""
 echo "Homolog configurado!"

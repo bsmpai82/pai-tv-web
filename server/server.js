@@ -29,6 +29,10 @@ const { startAlertChecker } = require('./services/alertChecker');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+// Escuta so em loopback: em producao quem fala com a internet e o Caddy (reverse_proxy localhost:PORT).
+// Sem isso o Node ficava em 0.0.0.0 e so o ufw impedia o acesso direto as portas 3000/3001.
+// Para expor na rede (ex.: teste em LAN), defina HOST=0.0.0.0 no .env.
+const HOST = process.env.HOST || '127.0.0.1';
 // Ambiente atual (ex: 'homolog') — disponível em todas as views
 app.locals.appEnv = process.env.APP_ENV || '';
 const VIDEOS_PATH = process.env.VIDEOS_PATH || './uploads';
@@ -119,8 +123,8 @@ app.get('/', requireAuth, (req, res) => {
     res.render('dashboard', { videoCount, playlistCount, deviceCount, groupCount, pendingCount, devices, offlineDevices });
 });
 
-app.listen(PORT, () => {
-    console.log(`PAI TV rodando em http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+    console.log(`PAI TV rodando em http://${HOST}:${PORT}`);
     ensureApkToken();
     startAlertChecker();
 });
