@@ -1,27 +1,34 @@
 #!/bin/bash
 # Setup idempotente do ambiente de homologação PAI TV
-# Rodar no VPS como root: bash /root/pai-tv-web-homolog/deploy/setup-homolog.sh
+# Rodar no VPS como root: bash /srv/paitv/homolog/deploy/setup-homolog.sh
+# O app roda como o usuario de sistema paitv (desde 2026-10-25); git, npm e pm2 rodam como ele.
 set -e
 
 REPO="https://github.com/bsmpai82/pai-tv-web"
-DIR="/root/pai-tv-web-homolog"
+DIR="/srv/paitv/homolog"
 SERVER_DIR="$DIR/server"
+AS_PAITV="runuser -u paitv --"
+PM2="runuser -u paitv -- env HOME=/srv/paitv pm2"
+
+if ! id paitv >/dev/null 2>&1; then
+  echo "Usuario paitv nao existe. Crie antes:"
+  echo "  useradd --system --user-group --home-dir /srv/paitv --create-home --shell /usr/sbin/nologin paitv"
+  exit 1
+fi
 
 echo "==> [1/6] Clonando / atualizando repositório..."
 if [ ! -d "$DIR" ]; then
-  git clone "$REPO" "$DIR"
+  $AS_PAITV git clone "$REPO" "$DIR"
 fi
-cd "$DIR"
-git fetch origin
-git checkout develop
-git pull origin develop
+$AS_PAITV git -C "$DIR" fetch origin
+$AS_PAITV git -C "$DIR" checkout develop
+$AS_PAITV git -C "$DIR" pull --ff-only origin develop
 
 echo "==> [2/6] Instalando dependências npm..."
-cd "$SERVER_DIR"
-npm install
+$AS_PAITV sh -c "cd '$SERVER_DIR' && npm install --no-audit --no-fund"
 
 echo "==> [3/6] Criando diretórios de dados..."
-mkdir -p /srv/pai_tv_homolog/thumbs /srv/pai_tv_homolog/releases
+install -d -o paitv -g paitv /srv/pai_tv_homolog /srv/pai_tv_homolog/thumbs /srv/pai_tv_homolog/releases
 
 echo "==> [4/6] Criando .env (se não existir)..."
 if [ ! -f "$SERVER_DIR/.env" ]; then
@@ -36,6 +43,8 @@ RELEASES_PATH=/srv/pai_tv_homolog/releases
 SESSION_SECRET=$SECRET
 # GMAIL_* ausentes — evita alertas de homolog chegarem nos destinatarios reais
 EOF
+  chown paitv:paitv "$SERVER_DIR/.env"
+  chmod 600 "$SERVER_DIR/.env"
   echo "    .env criado em $SERVER_DIR/.env"
   echo "    Revise o arquivo se necessário antes de continuar."
 else
@@ -43,13 +52,12 @@ else
 fi
 
 echo "==> [5/6] Iniciando com PM2..."
-cd "$SERVER_DIR"
-if pm2 describe pai-tv-homolog > /dev/null 2>&1; then
-  pm2 restart pai-tv-homolog
+if $PM2 describe pai-tv-homolog > /dev/null 2>&1; then
+  $PM2 restart pai-tv-homolog
 else
-  pm2 start server.js --name pai-tv-homolog
+  $PM2 start server.js --name pai-tv-homolog --cwd "$SERVER_DIR"
 fi
-pm2 save
+$PM2 save
 
 echo "==> [6/6] Conferindo o Caddyfile..."
 # ATENCAO: deploy/Caddyfile so tem os blocos do PAI TV. Os blocos de sgi.paitv.com.br e
@@ -81,4 +89,4 @@ echo "  PM2:    pai-tv-homolog (porta 3001)"
 echo "  Banco:  $SERVER_DIR/db/pai_tv_homolog.db"
 echo ""
 echo "Próximo passo: crie o usuário master da homolog:"
-echo "  cd $SERVER_DIR && node setup.js"
+echo "  cd $SERVER_DIR && runuser -u paitv -- env HOME=/srv/paitv node setup.js"

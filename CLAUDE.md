@@ -160,12 +160,15 @@ git push                     # Envia pro GitHub
 
 ### No VPS (via SSH)
 ```bash
-cd /root/pai-tv-web          # Pasta do projeto no servidor
-git pull                     # Atualiza do GitHub
-node server/server.js        # Roda o servidor manualmente
-pm2 start server/server.js   # Roda com PM2 (recomendado em produção)
-pm2 logs                     # Ver logs em tempo real
-pm2 restart all              # Reinicia o servidor
+# Desde 2026-10-25 o app roda como o usuario de sistema `paitv` (nao root).
+# Prod: /srv/paitv/prod (branch main, PM2 "pai-tv")
+# Homolog: /srv/paitv/homolog (branch develop, PM2 "pai-tv-homolog")
+# Sempre rodar git/npm/pm2 COMO paitv: como root da "dubious ownership" e cria
+# arquivos com dono root que o app nao consegue alterar.
+runuser -u paitv -- git -C /srv/paitv/prod pull --ff-only origin main
+runuser -u paitv -- sh -c 'cd /srv/paitv/prod/server && npm install --no-audit --no-fund'
+runuser -u paitv -- env HOME=/srv/paitv pm2 restart pai-tv
+runuser -u paitv -- env HOME=/srv/paitv pm2 logs pai-tv --lines 50
 ```
 
 ---
@@ -213,9 +216,9 @@ pm2 restart all              # Reinicia o servidor
 - **IP público:** 72.60.249.207
 - **Domínio:** paitv.com.br (DNS configurado no Registro.br → IP do VPS)
 - **HTTPS:** Caddy 2.11.2 com Let's Encrypt automático
-- **Node.js:** rodando via PM2 em `/root/pai-tv-web/server`
-- **Banco:** SQLite em `/root/pai-tv-web/server/db/pai_tv.db`
-- **Vídeos:** `/root/pai-tv-web/server/uploads/`
+- **Node.js:** PM2 do usuário `paitv` (`pm2-paitv.service`) em `/srv/paitv/prod/server`, escutando só em `127.0.0.1:3000`
+- **Banco:** SQLite em `/srv/paitv/prod/server/db/pai_tv.db`
+- **Vídeos:** `/srv/paitv/prod/server/uploads/`
 - **Thumbnails:** `/srv/pai_tv/thumbs/`
 
 ## Build do APK Android
@@ -463,10 +466,9 @@ O token de download **não** é variável de ambiente — fica na tabela `settin
 ### Deploy no VPS após primeiro deploy desta feature
 
 ```bash
-cd /root/pai-tv-web
-git pull
-mkdir -p /srv/pai_tv/releases
-pm2 restart all
+runuser -u paitv -- git -C /srv/paitv/prod pull --ff-only origin main
+install -d -o paitv -g paitv /srv/pai_tv/releases
+runuser -u paitv -- env HOME=/srv/paitv pm2 restart pai-tv
 # Abrir https://paitv.com.br/settings e fazer upload do APK inicial
 ```
 
