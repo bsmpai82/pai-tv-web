@@ -193,7 +193,8 @@ Após iniciar o app em cada Fire Stick:
 | ------------- | ------------------------ | ----------------------------- |
 | Domínio       | paitv.com.br             | homolog.paitv.com.br          |
 | Porta Node.js | 3000                     | 3001                          |
-| Pasta no VPS  | /root/pai-tv-web         | /root/pai-tv-web-homolog      |
+| Pasta no VPS  | /srv/paitv/prod          | /srv/paitv/homolog            |
+| Usuário/PM2   | paitv (`pm2-paitv`)      | paitv (`pm2-paitv`)           |
 | Branch git    | main                     | develop                       |
 | Nome PM2      | pai-tv                   | pai-tv-homolog                |
 | Banco SQLite  | pai_tv.db                | pai_tv_homolog.db             |
@@ -210,10 +211,13 @@ feature branch → develop → push → deploy homolog → validado → merge ma
 
 ```bash
 ssh root@72.60.249.207
-bash /root/pai-tv-web-homolog/deploy/setup-homolog.sh
-# Depois, criar usuário master:
-cd /root/pai-tv-web-homolog/server && node setup.js
+bash /srv/paitv/homolog/deploy/setup-homolog.sh
+# Depois, criar usuário master (como paitv, para o banco não ganhar arquivo com dono root):
+cd /srv/paitv/homolog/server && runuser -u paitv -- env HOME=/srv/paitv node setup.js
 ```
+
+Desde 2026-10-25 o app roda como o usuário de sistema `paitv`. O script exige que esse usuário já
+exista e roda `git`, `npm` e `pm2` como ele.
 
 O script `deploy/setup-homolog.sh` é idempotente — pode ser re-executado para atualizar a homolog após novos commits no branch `develop`.
 
